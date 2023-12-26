@@ -20,7 +20,7 @@ services:
       - .env
     environment:
       PORT: 8100
-      REDIS_URL: "redis://redis:6379"
+      REDIS_URL: "redis://:WqFkLpYLsl2xtQajz5GZ6OVtvy2vPdUC@redis-16475.c300.eu-central-1-1.ec2.cloud.redislabs.com:16475"
 
   frontend:
     build:
