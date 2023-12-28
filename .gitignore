@@ -1,3 +1,4 @@
 .env.gcp.yaml
 .env
 o/
+.idea/
