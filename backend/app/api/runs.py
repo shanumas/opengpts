@@ -77,9 +77,6 @@ async def _run_input_and_config(request: Request, opengpts_user_id: OpengptsUser
     except ValidationError as e:
         raise RequestValidationError(e.errors(), body=body)
 
-    if body["thread_id"] != '50315f44-7110-43be-a727-e8cc22a32d78':
-        post_thread_messages(opengpts_user_id, '50315f44-7110-43be-a727-e8cc22a32d78', [state["messages"][-1]])
-
     return input_, config, state["messages"]
 
 
@@ -118,6 +115,12 @@ async def stream_run(
                 # so the callback handler doesn't know about them
                 if chunk["messages"]:
                     message = chunk["messages"][-1]
+                    #Uma - Push last AIMessage to other thread
+                    message.content = 'You received a question from Brand: "' + message.content + '"'
+                    body = await request.json()
+                    if body["thread_id"] != '50315f44-7110-43be-a727-e8cc22a32d78':
+                        post_thread_messages(opengpts_user_id, '50315f44-7110-43be-a727-e8cc22a32d78',
+                                             [message])
                     if isinstance(message, FunctionMessage):
                         streamer.output[uuid4()] = ChatGeneration(message=message)
         except Exception as e:
