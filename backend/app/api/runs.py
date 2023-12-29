@@ -24,6 +24,7 @@ from sse_starlette import EventSourceResponse
 
 from app.schema import OpengptsUserId
 from app.storage import get_assistant, get_thread_messages, public_user_id, post_thread_messages
+from app.forwarder import process_message
 from app.stream import StreamMessagesHandler
 
 import copy
@@ -120,11 +121,11 @@ async def stream_run(
                 if chunk["messages"]:
                     message = chunk["messages"][-1]
                     #Uma - Push last AIMessage to other thread
-                    modified_message = AIMessage(content='Question from brand: '+message.content)
                     body = await request.json()
-                    if body["thread_id"] != '585d31ef-4087-47b0-b60c-3cfc7223bddf':
-                        post_thread_messages(opengpts_user_id, '585d31ef-4087-47b0-b60c-3cfc7223bddf',
-                                             [modified_message])
+                    modified_message = AIMessage(
+                        content='Question from brand: ' + message.content + ' _' + body["thread_id"])
+                    process_message(opengpts_user_id, body["assistant_id"], modified_message)
+
                     if isinstance(message, FunctionMessage):
                         streamer.output[uuid4()] = ChatGeneration(message=message)
         except Exception as e:
