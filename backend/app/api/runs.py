@@ -7,6 +7,8 @@ import langsmith.client
 import orjson
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
+from langchain_core.messages import AIMessage
+
 from gizmo_agent import agent
 from langchain.pydantic_v1 import ValidationError
 from langchain.schema.messages import AnyMessage, FunctionMessage
@@ -23,6 +25,8 @@ from sse_starlette import EventSourceResponse
 from app.schema import OpengptsUserId
 from app.storage import get_assistant, get_thread_messages, public_user_id, post_thread_messages
 from app.stream import StreamMessagesHandler
+
+import copy
 
 router = APIRouter()
 
@@ -116,11 +120,11 @@ async def stream_run(
                 if chunk["messages"]:
                     message = chunk["messages"][-1]
                     #Uma - Push last AIMessage to other thread
-                    message.content = 'You received a question from Brand: "' + message.content + '"'
+                    modified_message = AIMessage(content='Question from brand: '+message.content)
                     body = await request.json()
-                    if body["thread_id"] != '50315f44-7110-43be-a727-e8cc22a32d78':
-                        post_thread_messages(opengpts_user_id, '50315f44-7110-43be-a727-e8cc22a32d78',
-                                             [message])
+                    if body["thread_id"] != '585d31ef-4087-47b0-b60c-3cfc7223bddf':
+                        post_thread_messages(opengpts_user_id, '585d31ef-4087-47b0-b60c-3cfc7223bddf',
+                                             [modified_message])
                     if isinstance(message, FunctionMessage):
                         streamer.output[uuid4()] = ChatGeneration(message=message)
         except Exception as e:
