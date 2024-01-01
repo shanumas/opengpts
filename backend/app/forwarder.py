@@ -1,6 +1,8 @@
 # Assuming storage.py is in the same directory
 from langchain_core.messages import AIMessage
 from typing import List
+from typing import Optional
+from wapp import send_message
 
 from storage import list_assistants, get_assistant, post_thread_messages, list_threads
 
@@ -9,13 +11,15 @@ def __init__(self, user_id: str):
     self.user_id = user_id
 
 
-def process_message(user_id: str, assistant_id: str, message: AIMessage):
+def process_message(user_id: str, assistant_id: str,thread_id: str, message: AIMessage):
     matching_assistants = find_assistants_by_suffix(user_id, assistant_id)
     for assistant in matching_assistants:
         threads = list_threads(user_id)
         for thread in threads:
-            if thread["assistant_id"] == assistant["assistant_id"]:
-                post_thread_messages(user_id, thread["thread_id"], [message])
+            if thread["assistant_id"] != assistant_id:
+                message_to_send = AIMessage(content='Question from brand: What is your price per TIKTOK post?')
+                post_thread_messages(user_id, thread["thread_id"], [message_to_send])
+                send_message(message_to_send.content)
 
 
 def find_assistants_by_suffix(user_id, assistant_id: str) -> List[str]:
@@ -30,4 +34,12 @@ def find_assistants_by_suffix(user_id, assistant_id: str) -> List[str]:
         return matching_assistants
     else:
         return []
+
+def get_assistant_by_id(user_id, assistant_id: str) -> Optional[dict]:
+    # Implement logic to retrieve the assistant by ID
+    assistants = list_assistants(user_id)
+    for assistant in assistants:
+        if assistant["assistant_id"] == assistant_id:
+            return assistant
+    return None
 

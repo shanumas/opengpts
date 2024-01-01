@@ -124,7 +124,7 @@ async def stream_run(
                     body = await request.json()
                     modified_message = AIMessage(
                         content='Question from brand: ' + message.content + ' _' + body["thread_id"])
-                    process_message(opengpts_user_id, body["assistant_id"], modified_message)
+                    process_message(opengpts_user_id, body["assistant_id"], body["thread_id"], modified_message)
 
                     if isinstance(message, FunctionMessage):
                         streamer.output[uuid4()] = ChatGeneration(message=message)
