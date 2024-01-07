@@ -24,7 +24,7 @@ from sse_starlette import EventSourceResponse
 
 from app.schema import OpengptsUserId
 from app.storage import get_assistant, get_thread_messages, public_user_id, post_thread_messages
-from app.forwarder import process_message
+from app.forwarder import process_message, reply_user
 from app.stream import StreamMessagesHandler
 
 import copy
@@ -125,6 +125,7 @@ async def stream_run(
                     modified_message = AIMessage(
                         content='Question from brand: ' + message.content + ' _' + body["thread_id"])
                     process_message(opengpts_user_id, body["assistant_id"], body["thread_id"], modified_message)
+                    reply_user(message)
 
                     if isinstance(message, FunctionMessage):
                         streamer.output[uuid4()] = ChatGeneration(message=message)

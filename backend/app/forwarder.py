@@ -10,6 +10,10 @@ from storage import list_assistants, get_assistant, post_thread_messages, list_t
 def __init__(self, user_id: str):
     self.user_id = user_id
 
+def reply_user(message: AIMessage):
+    send_message(message.content)
+
+
 
 def process_message(user_id: str, assistant_id: str,thread_id: str, message: AIMessage):
     matching_assistants = find_assistants_by_suffix(user_id, assistant_id)
