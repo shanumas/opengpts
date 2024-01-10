@@ -10,8 +10,8 @@ from storage import list_assistants, get_assistant, post_thread_messages, list_t
 def __init__(self, user_id: str):
     self.user_id = user_id
 
-def reply_user(message: AIMessage):
-    send_message(message.content)
+def reply_user(message: AIMessage, to_number, from_id):
+    send_message(message.content, to_number, from_id)
 
 
 
@@ -21,9 +21,8 @@ def process_message(user_id: str, assistant_id: str,thread_id: str, message: AIM
         threads = list_threads(user_id)
         for thread in threads:
             if thread["assistant_id"] != assistant_id:
-                message_to_send = AIMessage(content='Question from brand: What is your price per TIKTOK post?')
-                post_thread_messages(user_id, thread["thread_id"], [message_to_send])
-                send_message(message_to_send.content)
+                post_thread_messages(user_id, thread["thread_id"], [message])
+                send_message(message.content,"46708943293", "")
 
 
 def find_assistants_by_suffix(user_id, assistant_id: str) -> List[str]:

@@ -120,12 +120,16 @@ async def stream_run(
                 # so the callback handler doesn't know about them
                 if chunk["messages"]:
                     message = chunk["messages"][-1]
-                    #Uma - Push last AIMessage to other thread
-                    body = await request.json()
-                    modified_message = AIMessage(
-                        content='Question from brand: ' + message.content + ' _' + body["thread_id"])
-                    process_message(opengpts_user_id, body["assistant_id"], body["thread_id"], modified_message)
-                    reply_user(message)
+                    #If this is a question to other party
+                    if(message.content=="I'll forward and return with an answer."):
+                        #Uma - Push last AIMessage to other thread(brand or creator)
+                        body = await request.json()
+                        modified_message = AIMessage(
+                            content='Question from brand: ' + input_["messages"][0].content + ' _' + body["thread_id"])
+                        #Forward question to other party
+                        process_message(opengpts_user_id, body["assistant_id"], body["thread_id"], modified_message)
+                    #Uma - Reply to user on whatsapp, thred is update by default by opengpts
+                    reply_user(message, "46708943293", "")
 
                     if isinstance(message, FunctionMessage):
                         streamer.output[uuid4()] = ChatGeneration(message=message)
