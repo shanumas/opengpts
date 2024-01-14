@@ -28,11 +28,10 @@ def process_message(user_id: str, assistant_id: str,thread_id: str, message: AIM
 def find_assistants_by_suffix(user_id, assistant_id: str) -> List[str]:
     assistant = get_assistant(user_id, assistant_id)
     if assistant:
-        assistant_name = assistant["name"]
-        suffix = assistant_name.rsplit('_', 1)[-1]  # Get the suffix after the last underscore
+        suffix = assistant_id.rsplit('_', 1)[-1]  # Get the suffix after the last underscore
         assistants = list_assistants(user_id)
         matching_assistants = [
-            a for a in assistants if (a["assistant_id"] != assistant_id) & (a["name"].endswith(suffix))
+            a for a in assistants if (a["assistant_id"] != assistant_id) & (a["assistant_id"].endswith(suffix))
         ]
         return matching_assistants
     else:
