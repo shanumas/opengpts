@@ -1,4 +1,4 @@
-import { PlusIcon } from "@heroicons/react/24/outline";
+import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 
 import { ChatListProps } from "../hooks/useChatList";
 import { cn } from "../utils/cn";
@@ -27,9 +27,9 @@ export function ChatList(props: {
             "flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border text-[0.625rem] font-medium bg-white"
           )}
         >
-          <PlusIcon className="h-4 w-4" />
+          <Cog6ToothIcon className="h-4 w-4" />
         </span>
-        <span className="truncate">New Chat</span>
+        <span className="truncate">Bot Settings</span>
       </div>
 
       <div className="text-xs font-semibold leading-6 text-gray-400 mt-4">
