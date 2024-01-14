@@ -29,7 +29,7 @@ export function ChatList(props: {
         >
           <Cog6ToothIcon className="h-4 w-4" />
         </span>
-        <span className="truncate">Bot Settings</span>
+        <span className="truncate">Settings</span>
       </div>
 
       <div className="text-xs font-semibold leading-6 text-gray-400 mt-4">

@@ -1,5 +1,3 @@
-import { PlusIcon } from "@heroicons/react/24/outline";
-
 import { Config, ConfigListProps } from "../hooks/useConfigList";
 import { cn } from "../utils/cn";
 
@@ -42,7 +40,9 @@ export function ConfigList(props: {
 }) {
   return (
     <>
-      <div
+     {/*
+     admin-condition
+     <div
         onClick={() => props.enterConfig(null)}
         className={cn(
           props.currentConfig === null
@@ -62,7 +62,7 @@ export function ConfigList(props: {
           <PlusIcon className="h-4 w-4" />
         </span>
         <span className="truncate">New Bot</span>
-      </div>
+      </div>*/}
 
       <div className="text-xs font-semibold leading-6 text-gray-400 mt-4">
         Your Saved Bots

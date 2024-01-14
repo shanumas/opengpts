@@ -104,7 +104,7 @@ export function Layout(props: {
               OpenGPTs: <span className="font-normal">{props.subtitle}</span>
             </>
           ) : (
-            "Bot Settings"
+            "Settings"
           )}
         </div>
         <div className="inline-flex items-center rounded-md bg-pink-100 px-2 py-1 text-xs font-medium text-pink-700">
