@@ -33,7 +33,7 @@ export function ChatList(props: {
       </div>
 
       <div className="text-xs font-semibold leading-6 text-gray-400 mt-4">
-        Your chats
+        Incoming Messages
       </div>
       <ul role="list" className="-mx-2 mt-2 space-y-1">
         {props.chats?.map((chat) => (

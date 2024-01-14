@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import logo from "../images/chatbot.png"
 
 export function Layout(props: {
   sidebarOpen: boolean;
@@ -101,15 +102,17 @@ export function Layout(props: {
         <div className="flex-1 text-sm font-semibold leading-6 text-gray-900 lg:pl-72">
           {props.subtitle ? (
             <>
-              OpenGPTs: <span className="font-normal">{props.subtitle}</span>
+              History: <span className="font-normal">{props.subtitle}</span>
             </>
           ) : (
             "Settings"
           )}
         </div>
-        <div className="inline-flex items-center rounded-md bg-pink-100 px-2 py-1 text-xs font-medium text-pink-700">
-          Mami-bot
-        </div>
+        <img
+            className="icon" // Replace with your actual class for styling the image
+            src={logo}
+            alt="Your Alt Text"
+        />
       </div>
 
       <main className="pt-20 lg:pl-72 flex flex-col min-h-[calc(100%-56px)]">
