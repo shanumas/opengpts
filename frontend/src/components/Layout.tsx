@@ -108,8 +108,7 @@ export function Layout(props: {
           )}
         </div>
         <div className="inline-flex items-center rounded-md bg-pink-100 px-2 py-1 text-xs font-medium text-pink-700">
-          Research Preview: this is unauthenticated and all data can be found.
-          Do not use with sensitive data
+          Mami-bot
         </div>
       </div>
 
