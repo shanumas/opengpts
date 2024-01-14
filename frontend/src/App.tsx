@@ -8,6 +8,7 @@ import { Chat as ChatType, useChatList } from "./hooks/useChatList";
 import { useSchemas } from "./hooks/useSchemas";
 import { useStreamState } from "./hooks/useStreamState";
 import { useConfigList } from "./hooks/useConfigList";
+import { useNavigate } from "react-router-dom";
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -15,6 +16,12 @@ function App() {
   const { chats, currentChat, createChat, enterChat } = useChatList();
   const { configs, currentConfig, saveConfig, enterConfig } = useConfigList();
   const { startStream, stopStream, stream } = useStreamState();
+
+  const navigate = useNavigate();
+  const userCookie = document.cookie.split('; ').find(cookie => cookie.startsWith('opengpts_user_id='));
+  const isUserSignedIn = userCookie && userCookie.split('=')[1] === '46708943293';
+
+  isUserSignedIn ? '':navigate("/signin");
 
   const startTurn = useCallback(
     async (message: string, chat: ChatType | null = currentChat) => {

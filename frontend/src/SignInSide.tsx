@@ -43,7 +43,7 @@ export default function SignInSide() {
     const enteredPassword = data.get('password') as string;
     if (enteredEmail === '46708943293' && enteredPassword === 'password') {
     // Authentication successful, you can redirect or perform further actions
-      document.cookie = 'opengpts_user_id=enteredEmail;';
+      document.cookie = 'opengpts_user_id='+enteredEmail+';';
        navigate("/app")
     }
   };
@@ -88,7 +88,7 @@ export default function SignInSide() {
                 required
                 fullWidth
                 id="email"
-                label="Email Address"
+                label="Number"
                 name="email"
                 autoComplete="email"
                 autoFocus
