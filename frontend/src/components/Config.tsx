@@ -214,7 +214,7 @@ export function Config(props: {
     },
     maxSize: 10_000_000, // Up to 10 MB file size.
   });
-  const [isPublic, setPublic] = useState(props.config?.public ?? false);
+  const [isPublic] = useState(props.config?.public ?? false);
   useEffect(() => {
     setValues(props.config?.config ?? props.configDefaults);
   }, [props.config, props.configDefaults]);
@@ -242,17 +242,17 @@ export function Config(props: {
   const readonly = !!props.config && !inflight;
   return (
     <>
-      <div className="flex gap-2 items-center justify-between font-semibold text-lg leading-6 text-gray-600 mb-4">
+      <div className="flex gap-2 items-center justify-between font-semibold text-lg leading-6 text-gray-600 mt-4 mb-4">
         <span>
           Bot: {props.config?.name ?? "New Bot"}{" "}
           <span className="font-normal">
-            {props.config ? "(read-only)" : ""}
+            {/*{props.config ? "(read-only)" : ""}*/}
           </span>
         </span>
       </div>
-      {props.config?.public && (
+      {/*{props.config?.public && (
         <PublicLink assistantId={props.config?.assistant_id} />
-      )}
+      )}*/}
       <form
         className={cn("flex flex-col gap-8")}
         onSubmit={async (e) => {
@@ -346,6 +346,7 @@ export function Config(props: {
               setFiles={setFiles}
             />
           )}
+            {/*
           <SingleOptionField
             id="public"
             field={{
@@ -358,7 +359,7 @@ export function Config(props: {
             value={isPublic ? "Yes" : "No"}
             setValue={(value: string) => setPublic(value === "Yes")}
             readonly={readonly}
-          />
+          />*/}
         </div>
         {!props.config && (
           <div className="flex flex-row">

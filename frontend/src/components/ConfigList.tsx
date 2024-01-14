@@ -65,7 +65,7 @@ export function ConfigList(props: {
       </div>*/}
 
       <div className="text-xs font-semibold leading-6 text-gray-400 mt-4">
-        Your Saved Bots
+        Bots you can edit
       </div>
       <ul role="list" className="-mx-2 mt-2 space-y-1">
         {props.configs
@@ -84,6 +84,8 @@ export function ConfigList(props: {
         )}
       </ul>
 
+        {/*
+        //admin-condition
       <div className="text-xs font-semibold leading-6 text-gray-400 mt-4">
         Public Bots
       </div>
@@ -103,6 +105,7 @@ export function ConfigList(props: {
           </li>
         )}
       </ul>
+      */}
     </>
   );
 }

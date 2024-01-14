@@ -102,14 +102,14 @@ export function Layout(props: {
         <div className="flex-1 text-sm font-semibold leading-6 text-gray-900 lg:pl-72">
           {props.subtitle ? (
             <>
-              History: <span className="font-normal">{props.subtitle}</span>
+              Incoming messages: <span className="font-normal">{props.subtitle}</span>
             </>
           ) : (
             "Settings"
           )}
         </div>
         <img
-            className="icon" // Replace with your actual class for styling the image
+            className="m-0" // Replace with your actual class for styling the image
             src={logo}
             alt="Your Alt Text"
         />
