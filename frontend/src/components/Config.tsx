@@ -287,7 +287,7 @@ export function Config(props: {
             }
             if (value.type === "string" && value.enum) {
               return (
-                <SingleOptionField
+                false && <SingleOptionField
                   key={key}
                   id={key}
                   field={value}
