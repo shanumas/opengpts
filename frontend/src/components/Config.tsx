@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { marked } from "marked";
-import { ShareIcon } from "@heroicons/react/24/outline";
+/*import { ShareIcon } from "@heroicons/react/24/outline";*/
 import { useDropzone } from "react-dropzone";
 import { orderBy } from "lodash";
 
@@ -159,7 +159,7 @@ function MultiOptionField(props: {
   );
 }
 
-function PublicLink(props: { assistantId: string }) {
+{/*function PublicLink(props: { assistantId: string }) {
   const link = window.location.href + "?shared_id=" + props.assistantId;
   return (
     <div className="flex rounded-md shadow-sm mb-4">
@@ -187,7 +187,7 @@ function PublicLink(props: { assistantId: string }) {
       </a>
     </div>
   );
-}
+}*/}
 
 function fileId(file: File) {
   return `${file.name}-${file.size}-${file.lastModified}`;
