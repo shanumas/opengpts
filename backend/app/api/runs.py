@@ -7,7 +7,7 @@ import langsmith.client
 import orjson
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
-from langchain_core.messages import AIMessage
+from langchain_core.messages import AIMessage, HumanMessage
 
 from gizmo_agent import agent
 from langchain.pydantic_v1 import ValidationError
@@ -26,6 +26,11 @@ from app.schema import OpengptsUserId
 from app.storage import get_assistant, get_thread_messages, public_user_id, post_thread_messages
 from app.forwarder import process_message, reply_user
 from app.stream import StreamMessagesHandler
+
+from langchain_community.vectorstores import FAISS
+from langchain_community.embeddings import OpenAIEmbeddings
+from langchain.tools.retriever import create_retriever_tool
+
 
 import copy
 
@@ -54,7 +59,7 @@ async def _run_input_and_config(request: Request, opengpts_user_id: OpengptsUser
         body = await request.json()
     except json.JSONDecodeError:
         raise RequestValidationError(errors=["Invalid JSON body"])
-    assistant, public_assistant, state = await asyncio.gather(
+    assistant, public_assistant, state, brand_state = await asyncio.gather(
         asyncio.get_running_loop().run_in_executor(
             None, get_assistant, opengpts_user_id, body["assistant_id"]
         ),
@@ -64,7 +69,28 @@ async def _run_input_and_config(request: Request, opengpts_user_id: OpengptsUser
         asyncio.get_running_loop().run_in_executor(
             None, get_thread_messages, opengpts_user_id, body["thread_id"]
         ),
+        asyncio.get_running_loop().run_in_executor(
+            None, get_thread_messages, opengpts_user_id, "46708943293_46708943293"
+        )
     )
+
+    chat_history = ""
+    #This condition will never happen, move this code to where tools are resolved instead
+    if body["assistant_id"].startswith('personal'):
+
+
+        for message in brand_state["messages"]:
+            if isinstance(message, AIMessage):
+                chat_history += f'AI: {message.content}\n'
+            elif isinstance(message, HumanMessage):
+                chat_history += f'Human: {message.content}\n'
+            else:
+                chat_history += 'Unknown message type\n'
+
+        history_message = AIMessage(content="This is chat history for you from artisanals.  I will use this to answer your future questions."+chat_history)
+        state["messages"].append(history_message)
+
+
     assistant = assistant or public_assistant
     if not assistant:
         raise HTTPException(status_code=404, detail="Assistant not found")
@@ -82,7 +108,7 @@ async def _run_input_and_config(request: Request, opengpts_user_id: OpengptsUser
     except ValidationError as e:
         raise RequestValidationError(e.errors(), body=body)
 
-    return input_, config, state["messages"]
+    return input_, config, state["messages"], chat_history
 
 
 @router.post("")
@@ -93,7 +119,7 @@ async def create_run(
     background_tasks: BackgroundTasks,
 ):
     """Create a run."""
-    input_, config, messages = await _run_input_and_config(request, opengpts_user_id)
+    input_, config, messages, chat_history = await _run_input_and_config(request, opengpts_user_id)
     background_tasks.add_task(agent.ainvoke, input_, config)
     return {"status": "ok"}  # TODO add a run id
 
@@ -105,7 +131,8 @@ async def stream_run(
     opengpts_user_id: OpengptsUserId,
 ):
     """Create a run."""
-    input_, config, messages = await _run_input_and_config(request, opengpts_user_id)
+    input_, config, messages, chat_history = await _run_input_and_config(request, opengpts_user_id)
+    input_["messages"][0].content = input_["messages"][0].content + ".  check also this chat history to give me an answer."+chat_history
     streamer = StreamMessagesHandler(messages + input_["messages"])
     event_aggregator = AsyncEventAggregatorCallback()
     config["callbacks"] = [streamer, event_aggregator]
