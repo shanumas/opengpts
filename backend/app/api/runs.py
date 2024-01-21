@@ -27,11 +27,6 @@ from app.storage import get_assistant, get_thread_messages, public_user_id, post
 from app.forwarder import process_message, reply_user
 from app.stream import StreamMessagesHandler
 
-from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import OpenAIEmbeddings
-from langchain.tools.retriever import create_retriever_tool
-
-
 import copy
 
 router = APIRouter()
@@ -75,10 +70,8 @@ async def _run_input_and_config(request: Request, opengpts_user_id: OpengptsUser
     )
 
     chat_history = ""
-    #This condition will never happen, move this code to where tools are resolved instead
+    # This condition will never happen, move this code to where tools are resolved instead
     if body["assistant_id"].startswith('personal'):
-
-
         for message in brand_state["messages"]:
             if isinstance(message, AIMessage):
                 chat_history += f'AI: {message.content}\n'
@@ -86,10 +79,6 @@ async def _run_input_and_config(request: Request, opengpts_user_id: OpengptsUser
                 chat_history += f'Human: {message.content}\n'
             else:
                 chat_history += 'Unknown message type\n'
-
-        history_message = AIMessage(content="This is chat history for you from artisanals.  I will use this to answer your future questions."+chat_history)
-        state["messages"].append(history_message)
-
 
     assistant = assistant or public_assistant
     if not assistant:
@@ -101,12 +90,16 @@ async def _run_input_and_config(request: Request, opengpts_user_id: OpengptsUser
             "user_id": opengpts_user_id,
             "thread_id": body["thread_id"],
             "assistant_id": body["assistant_id"],
+            "chat_history": chat_history
         },
     }
     try:
         input_ = _unpack_input(agent.get_input_schema(config).validate(body["input"]))
     except ValidationError as e:
         raise RequestValidationError(e.errors(), body=body)
+
+    if chat_history is not None and chat_history != "":
+        config["configurable"]["type==agent/tools"] = config["configurable"]["type==agent/tools"]+["ChatHistoryTool"]
 
     return input_, config, state["messages"], chat_history
 
@@ -132,7 +125,7 @@ async def stream_run(
 ):
     """Create a run."""
     input_, config, messages, chat_history = await _run_input_and_config(request, opengpts_user_id)
-    input_["messages"][0].content = input_["messages"][0].content + ".  check also this chat history to give me an answer."+chat_history
+    #messages = messages + [HumanMessage(content="Consider also this chat history to answer my questions"+chat_history)]
     streamer = StreamMessagesHandler(messages + input_["messages"])
     event_aggregator = AsyncEventAggregatorCallback()
     config["callbacks"] = [streamer, event_aggregator]

@@ -17,7 +17,7 @@ from gizmo_agent.agent_types import (
     get_openai_function_agent,
     # get_xml_agent,
 )
-from gizmo_agent.tools import TOOL_OPTIONS, TOOLS, AvailableTools, get_retrieval_tool
+from gizmo_agent.tools import TOOL_OPTIONS, TOOLS, AvailableTools, get_retrieval_tool, get_chat_history_tool
 
 DEFAULT_SYSTEM_MESSAGE = "You are a helpful assistant."
 
@@ -27,6 +27,7 @@ class ConfigurableAgent(RunnableBinding):
     agent: GizmoAgentType
     system_message: str = DEFAULT_SYSTEM_MESSAGE
     assistant_id: Optional[str] = None
+    chat_history: Optional[str] = None
     user_id: Optional[str] = None
 
     def __init__(
@@ -36,12 +37,14 @@ class ConfigurableAgent(RunnableBinding):
         agent: GizmoAgentType = GizmoAgentType.GPT_35_TURBO,
         system_message: str = DEFAULT_SYSTEM_MESSAGE,
         assistant_id: Optional[str] = None,
+        chat_history: Optional[str] = None,
         kwargs: Optional[Mapping[str, Any]] = None,
         config: Optional[Mapping[str, Any]] = None,
         **others: Any,
     ) -> None:
         others.pop("bound", None)
         _tools = []
+        #Regular tools
         for _tool in tools:
             if _tool == AvailableTools.RETRIEVAL:
                 if assistant_id is None:
@@ -49,6 +52,12 @@ class ConfigurableAgent(RunnableBinding):
                         "assistant_id must be provided if Retrieval tool is used"
                     )
                 _tools.append(get_retrieval_tool(assistant_id))
+            elif _tool == AvailableTools.CHAT_HISTORY:
+                if chat_history is None or chat_history == "":
+                    raise ValueError(
+                        "chat_history must be provided if CHAT_HISTORY tool is used"
+                    )
+                _tools.append(get_chat_history_tool(chat_history))
             else:
                 _tools.append(TOOLS[_tool]())
         if agent == GizmoAgentType.GPT_35_TURBO:
@@ -111,12 +120,16 @@ agent = (
         tools=[],
         system_message=DEFAULT_SYSTEM_MESSAGE,
         assistant_id=None,
+        chat_history=None,
     )
     .configurable_fields(
         agent=ConfigurableField(id="agent_type", name="Agent Type"),
         system_message=ConfigurableField(id="system_message", name="System Message"),
         assistant_id=ConfigurableField(
             id="assistant_id", name="Assistant ID", is_shared=True
+        ),
+        chat_history=ConfigurableField(
+            id="chat_history", name="Chat History", is_shared=True
         ),
         tools=ConfigurableFieldMultiOption(
             id="tools",

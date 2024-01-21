@@ -9,6 +9,8 @@ from langchain.tools.tavily_search import TavilyAnswer, TavilySearchResults
 from langchain.utilities import ArxivAPIWrapper
 from langchain.utilities.tavily_search import TavilySearchAPIWrapper
 from langchain.vectorstores.redis import RedisFilter
+from langchain_community.vectorstores import FAISS
+from langchain_community.embeddings import OpenAIEmbeddings
 
 from gizmo_agent.ingest import vstore
 
@@ -36,6 +38,18 @@ def get_retrieval_tool(assistant_id: str):
         ),
         "Retriever",
         RETRIEVER_DESCRIPTION,
+    )
+
+def get_chat_history_tool(chat_history:str):
+    CHAT_HISTORY_DESCRIPTION = """Can be used to look up information that was uploaded to this assistant.
+    If the user is referencing particular brand conversation, that is often a good hint that information may be here."""
+    embeddings = OpenAIEmbeddings()
+    db = FAISS.from_texts(chat_history, embeddings)
+    retriever = db.as_retriever()
+    return create_retriever_tool(
+        retriever,
+        "ChatHistoryTool",
+        CHAT_HISTORY_DESCRIPTION,
     )
 
 
@@ -108,6 +122,7 @@ class AvailableTools(str, Enum):
     PRESS_RELEASES = "Press Releases (Kay.ai)"
     PUBMED = "PubMed"
     WIKIPEDIA = "Wikipedia"
+    CHAT_HISTORY = "ChatHistoryTool"
 
 
 TOOLS = {
