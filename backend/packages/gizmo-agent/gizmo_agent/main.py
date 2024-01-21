@@ -44,6 +44,7 @@ class ConfigurableAgent(RunnableBinding):
     ) -> None:
         others.pop("bound", None)
         _tools = []
+        chat_history = "There is an incoming deal from Artisanals.  Artisanals have 100 employees"
         #Regular tools
         for _tool in tools:
             if _tool == AvailableTools.RETRIEVAL:

@@ -6,3 +6,4 @@ langserve==0.0.32
 langsmith==0.0.70
 permchain
 python-multipart
+python-magic

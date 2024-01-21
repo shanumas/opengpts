@@ -11,6 +11,9 @@ from langchain.utilities.tavily_search import TavilySearchAPIWrapper
 from langchain.vectorstores.redis import RedisFilter
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import OpenAIEmbeddings
+from langchain.schema.document import Document
+from langchain.text_splitter import CharacterTextSplitter
+from langchain_community.document_loaders import TextLoader
 
 from gizmo_agent.ingest import vstore
 
@@ -43,8 +46,14 @@ def get_retrieval_tool(assistant_id: str):
 def get_chat_history_tool(chat_history:str):
     CHAT_HISTORY_DESCRIPTION = """Can be used to look up information that was uploaded to this assistant.
     If the user is referencing particular brand conversation, that is often a good hint that information may be here."""
+    documents = Document(
+        page_content=chat_history,
+        metadata={"source": "local"}
+    )
+    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
+    docs = text_splitter.split_documents([documents])
     embeddings = OpenAIEmbeddings()
-    db = FAISS.from_texts(chat_history, embeddings)
+    db = FAISS.from_documents(docs, embeddings)
     retriever = db.as_retriever()
     return create_retriever_tool(
         retriever,
