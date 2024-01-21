@@ -127,7 +127,7 @@ async def stream_run(
     config["callbacks"] = [streamer, event_aggregator]
 
     body = await request.json()
-    sender_number = body["thread_id"].split('_')[0]
+    sender_number = body["thread_id"].split('_')[0] if body["thread_id"].split('_')[0] != 'personal' else body["thread_id"].split('_')[1]
     creator_number = body["thread_id"].split('_')[1]
 
     # Call the runnable in streaming mode,
