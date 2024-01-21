@@ -11,18 +11,21 @@ def __init__(self, user_id: str):
     self.user_id = user_id
 
 def reply_user(message: AIMessage, to_number, from_id):
-    send_message(message.content, to_number, from_id)
+    #Some retrieval tools could send some objects, filter them
+    if isinstance(message.content, str):
+        send_message(message.content, to_number, from_id)
 
 
 
-def process_message(user_id: str, assistant_id: str,thread_id: str, message: AIMessage):
+def process_message(user_id: str, assistant_id: str,thread_id: str, message: AIMessage, creator_number: str):
     matching_assistants = find_assistants_by_suffix(user_id, assistant_id)
     for assistant in matching_assistants:
         threads = list_threads(user_id)
         for thread in threads:
             if thread["assistant_id"] != assistant_id:
                 post_thread_messages(user_id, thread["thread_id"], [message])
-                send_message(message.content,"46708943293", "")
+                #This is ford id or +1 number
+                send_message(message.content,creator_number, "140653755809086")
 
 
 def find_assistants_by_suffix(user_id, assistant_id: str) -> List[str]:

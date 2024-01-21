@@ -95,10 +95,10 @@ class AgentOutput(BaseModel):
 
 
 dnd_llm = ChatOpenAI(
-    model="gpt-3.5-turbo-1106", temperature=0, streaming=True
+    model="gpt-4-1106-preview", temperature=0, streaming=True
 ).configurable_alternatives(
     ConfigurableField(id="llm", name="LLM"),
-    default_key="gpt-35-turbo",
+    default_key="gpt-4-turbo",
     # azure_openai=AzureChatOpenAI(
     #     temperature=0,
     #     deployment_name=os.environ["AZURE_OPENAI_DEPLOYMENT_NAME"],

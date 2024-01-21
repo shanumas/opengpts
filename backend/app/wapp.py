@@ -10,7 +10,7 @@ headers = {
 
 
 def send_message(message, to_number, from_id):
-    #data["text"]["body"] = data["text"]["body"] + ': '+message
+    #RN we can send messages only from 353 892619075
     from_id = "189399934262514"
     data = {
         "messaging_product": "whatsapp",

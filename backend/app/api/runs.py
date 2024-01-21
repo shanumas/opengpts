@@ -54,18 +54,15 @@ async def _run_input_and_config(request: Request, opengpts_user_id: OpengptsUser
         body = await request.json()
     except json.JSONDecodeError:
         raise RequestValidationError(errors=["Invalid JSON body"])
-    assistant, public_assistant, state, brand_state = await asyncio.gather(
+    assistant, state, brand_state = await asyncio.gather(
         asyncio.get_running_loop().run_in_executor(
             None, get_assistant, opengpts_user_id, body["assistant_id"]
-        ),
-        asyncio.get_running_loop().run_in_executor(
-            None, get_assistant, public_user_id, body["assistant_id"]
         ),
         asyncio.get_running_loop().run_in_executor(
             None, get_thread_messages, opengpts_user_id, body["thread_id"]
         ),
         asyncio.get_running_loop().run_in_executor(
-            None, get_thread_messages, opengpts_user_id, "46708943293_46708943293"
+            None, get_thread_messages, opengpts_user_id, "46762739173_46708943293"
         )
     )
 
@@ -80,7 +77,6 @@ async def _run_input_and_config(request: Request, opengpts_user_id: OpengptsUser
             else:
                 chat_history += 'Unknown message type\n'
 
-    assistant = assistant or public_assistant
     if not assistant:
         raise HTTPException(status_code=404, detail="Assistant not found")
     config: RunnableConfig = {
@@ -130,6 +126,10 @@ async def stream_run(
     event_aggregator = AsyncEventAggregatorCallback()
     config["callbacks"] = [streamer, event_aggregator]
 
+    body = await request.json()
+    sender_number = body["thread_id"].split('_')[0]
+    creator_number = body["thread_id"].split('_')[1]
+
     # Call the runnable in streaming mode,
     # add each chunk to the output stream
     async def consume_astream() -> None:
@@ -143,13 +143,12 @@ async def stream_run(
                     #If this is a question to other party
                     if(message.content=="I'll forward and return with an answer."):
                         #Uma - Push last AIMessage to other thread(brand or creator)
-                        body = await request.json()
                         modified_message = AIMessage(
-                            content='Question from brand: ' + input_["messages"][0].content + ' _' + body["thread_id"])
+                            content='Question from brand: ' + input_["messages"][0].content)
                         #Forward question to other party
-                        process_message(opengpts_user_id, body["assistant_id"], body["thread_id"], modified_message)
+                        process_message(opengpts_user_id, body["assistant_id"], body["thread_id"], modified_message, creator_number)
                     #Uma - Reply to user on whatsapp, thred is update by default by opengpts
-                    reply_user(message, "46708943293", "")
+                    reply_user(message, sender_number, "")
 
                     if isinstance(message, FunctionMessage):
                         streamer.output[uuid4()] = ChatGeneration(message=message)
