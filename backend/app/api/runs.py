@@ -23,7 +23,7 @@ from pydantic import BaseModel, Field
 from sse_starlette import EventSourceResponse
 
 from app.schema import OpengptsUserId
-from app.storage import get_assistant, get_thread_messages, public_user_id, post_thread_messages
+from app.storage import get_assistant, get_thread_messages, public_user_id, post_thread_messages, list_threads
 from app.forwarder import process_message, reply_user
 from app.stream import StreamMessagesHandler
 
@@ -54,6 +54,7 @@ async def _run_input_and_config(request: Request, opengpts_user_id: OpengptsUser
         body = await request.json()
     except json.JSONDecodeError:
         raise RequestValidationError(errors=["Invalid JSON body"])
+    thread_ids = list_threads()
     assistant, state, brand_state = await asyncio.gather(
         asyncio.get_running_loop().run_in_executor(
             None, get_assistant, opengpts_user_id, body["assistant_id"]
@@ -61,9 +62,9 @@ async def _run_input_and_config(request: Request, opengpts_user_id: OpengptsUser
         asyncio.get_running_loop().run_in_executor(
             None, get_thread_messages, opengpts_user_id, body["thread_id"]
         ),
-        asyncio.get_running_loop().run_in_executor(
-            None, get_thread_messages, opengpts_user_id, "46762739173_46708943293"
-        )
+        *[asyncio.get_running_loop().run_in_executor(
+            None, get_thread_messages, opengpts_user_id, thread_id
+        ) for thread_id in thread_ids  if thread_id != body["thread_id"]]
     )
 
     chat_history = ""
