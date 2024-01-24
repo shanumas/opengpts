@@ -54,7 +54,7 @@ async def _run_input_and_config(request: Request, opengpts_user_id: OpengptsUser
         body = await request.json()
     except json.JSONDecodeError:
         raise RequestValidationError(errors=["Invalid JSON body"])
-    thread_ids = list_threads()
+    thread_ids = list_threads(opengpts_user_id)
     assistant, state, brand_state = await asyncio.gather(
         asyncio.get_running_loop().run_in_executor(
             None, get_assistant, opengpts_user_id, body["assistant_id"]
@@ -64,7 +64,7 @@ async def _run_input_and_config(request: Request, opengpts_user_id: OpengptsUser
         ),
         *[asyncio.get_running_loop().run_in_executor(
             None, get_thread_messages, opengpts_user_id, thread_id
-        ) for thread_id in thread_ids  if thread_id != body["thread_id"]]
+        ) for thread_id in thread_ids if thread_id != body["thread_id"]]
     )
 
     chat_history = ""
