@@ -7,7 +7,7 @@ import "./index.css";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <Router>
     <Routes>
-        <Route path="/app" element={<App />} />
+        <Route path="app" element={<App />} />
         <Route path="signin" element={<SignInSide />} />
       <Route path="*" element={<SignInSide />} />
     </Routes>
