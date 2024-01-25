@@ -44,7 +44,7 @@ export default function SignInSide() {
     if ((enteredEmail === '46708943293' || enteredEmail === '79197217873' || enteredEmail === '31623848535') && enteredPassword === enteredEmail) {
     // Authentication successful, you can redirect or perform further actions
       document.cookie = 'opengpts_user_id='+enteredEmail+';';
-       navigate("/app")
+       navigate("/")
     }
   };
 
