@@ -55,7 +55,7 @@ async def _run_input_and_config(request: Request, opengpts_user_id: OpengptsUser
     except json.JSONDecodeError:
         raise RequestValidationError(errors=["Invalid JSON body"])
     thread_ids = list_threads(opengpts_user_id)
-    assistant, state, brand_state = await asyncio.gather(
+    assistant, state, *brand_state = await asyncio.gather(
         asyncio.get_running_loop().run_in_executor(
             None, get_assistant, opengpts_user_id, body["assistant_id"]
         ),
@@ -63,20 +63,21 @@ async def _run_input_and_config(request: Request, opengpts_user_id: OpengptsUser
             None, get_thread_messages, opengpts_user_id, body["thread_id"]
         ),
         *[asyncio.get_running_loop().run_in_executor(
-            None, get_thread_messages, opengpts_user_id, thread_id
-        ) for thread_id in thread_ids if thread_id != body["thread_id"]]
+            None, get_thread_messages, opengpts_user_id, thread_id["thread_id"]
+        ) for thread_id in thread_ids if thread_id["thread_id"] != body["thread_id"]]
     )
 
     chat_history = ""
     # This condition will never happen, move this code to where tools are resolved instead
     if body["assistant_id"].startswith('personal'):
-        for message in brand_state["messages"]:
-            if isinstance(message, AIMessage):
-                chat_history += f'AI: {message.content}\n'
-            elif isinstance(message, HumanMessage):
-                chat_history += f'Human: {message.content}\n'
-            else:
-                chat_history += 'Unknown message type\n'
+        for current_brand in brand_state:
+            for message in current_brand["messages"]:
+                if isinstance(message, AIMessage):
+                    chat_history += f'AI: {message.content}\n'
+                elif isinstance(message, HumanMessage):
+                    chat_history += f'Human: {message.content}\n'
+                else:
+                    chat_history += 'Unknown message type\n'
 
     if not assistant:
         raise HTTPException(status_code=404, detail="Assistant not found")
@@ -149,7 +150,8 @@ async def stream_run(
                         #Forward question to other party
                         process_message(opengpts_user_id, body["assistant_id"], body["thread_id"], modified_message, creator_number)
                     #Uma - Reply to user on whatsapp, thred is update by default by opengpts
-                    reply_user(message, sender_number, "")
+                    if not message.content.startswith("[Document"):
+                        reply_user(message, sender_number, "")
 
                     if isinstance(message, FunctionMessage):
                         streamer.output[uuid4()] = ChatGeneration(message=message)
