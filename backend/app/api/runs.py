@@ -143,10 +143,10 @@ async def stream_run(
                 if chunk["messages"]:
                     message = chunk["messages"][-1]
                     #If this is a question to other party
-                    if(message.content=="I'll forward and return with an answer."):
+                    if(message.content.startswith("Summary:")):
                         #Uma - Push last AIMessage to other thread(brand or creator)
                         modified_message = AIMessage(
-                            content='Question from brand: ' + input_["messages"][0].content)
+                            content=message.content)
                         #Forward question to other party
                         process_message(opengpts_user_id, body["assistant_id"], body["thread_id"], modified_message, creator_number)
                     #Uma - Reply to user on whatsapp, thred is update by default by opengpts
