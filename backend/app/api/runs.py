@@ -143,7 +143,7 @@ async def stream_run(
                 if chunk["messages"]:
                     message = chunk["messages"][-1]
                     #If this is a question to other party
-                    if(message.content.startswith("Summary:")):
+                    if(message.content.startswith("*")):
                         #Uma - Push last AIMessage to other thread(brand or creator)
                         modified_message = AIMessage(
                             content=message.content)
