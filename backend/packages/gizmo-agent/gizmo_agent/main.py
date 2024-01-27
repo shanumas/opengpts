@@ -61,7 +61,7 @@ class ConfigurableAgent(RunnableBinding):
                 _tools.append(get_chat_history_tool(chat_history))
             else:
                 _tools.append(TOOLS[_tool]())
-        if agent == (GizmoAgentType.GPT_4 or agent == GizmoAgentType.GPT_35_TURBO):
+        if agent == GizmoAgentType.GPT_4 or agent == GizmoAgentType.GPT_35_TURBO:
              _agent = get_openai_function_agent(_tools, system_message, gpt_4=True)
         # elif agent == GizmoAgentType.AZURE_OPENAI:
         #     _agent = get_openai_function_agent(_tools, system_message, azure=True)
