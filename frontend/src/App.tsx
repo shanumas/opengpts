@@ -19,7 +19,7 @@ function App() {
 
   const navigate = useNavigate();
   const userCookie = document.cookie.split('; ').find(cookie => cookie.startsWith('opengpts_user_id='));
-  const isUserSignedIn = userCookie &&  (userCookie.split('=')[1] === '46708943293' || userCookie.split('=')[1] === '79197217873' || userCookie.split('=')[1] === '31623848535');
+  const isUserSignedIn = userCookie &&  (userCookie.split('=')[1]!=undefined);
   isUserSignedIn ? '':navigate("/signin");
 
   const startTurn = useCallback(

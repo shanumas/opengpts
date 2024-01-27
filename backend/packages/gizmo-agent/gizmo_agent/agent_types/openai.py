@@ -11,7 +11,7 @@ def get_openai_function_agent(
 ):
     if not azure:
         if gpt_4:
-            llm = ChatOpenAI(model="gpt-4-1106-preview", temperature=0, streaming=True)
+            llm = ChatOpenAI(model="gpt-4-0125-preview", temperature=0, streaming=True)
         else:
             llm = ChatOpenAI(model="gpt-3.5-turbo-1106", temperature=0, streaming=True)
     else:
