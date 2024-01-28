@@ -146,8 +146,12 @@ async def stream_run(
                     #If this is a question to other party
                     if(message.content.startswith("*")):
                         #Uma - Push last AIMessage to other thread(brand or creator)
+                        #Add brand number for creator's reference and to use in creator-bot to reply to the brand-number
+                        #Remove the * character
+                        message_to_forward = message.content[1:]
+                        message_to_forward = message_to_forward + '\n' + 'Contact: +'+sender_number;
                         modified_message = AIMessage(
-                            content=message.content)
+                            content=message_to_forward)
                         #Forward question to other party
                         process_message(opengpts_user_id, body["assistant_id"], body["thread_id"], modified_message, creator_number)
                         #Change the reply_message if this is a forwarding message to creator
