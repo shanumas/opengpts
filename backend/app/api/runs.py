@@ -150,6 +150,7 @@ async def stream_run(
                         #Add brand number for creator's reference and to use in creator-bot to reply to the brand-number
                         #Remove the * character
                         message_to_forward = message.content[1:]
+                        message_to_forward += 'brand_number: '+sender_number;
                         modified_message = AIMessage(
                             content=message_to_forward)
                         #Forward question to other party
