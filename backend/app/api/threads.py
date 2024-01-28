@@ -3,6 +3,7 @@ from uuid import uuid4
 
 from fastapi import APIRouter, HTTPException, Path
 from langchain.schema.messages import AnyMessage
+from langchain_core.messages import AIMessage
 from pydantic import BaseModel, Field
 
 import app.storage as storage
@@ -40,7 +41,6 @@ def get_thread_messages(
 ):
     """Get all messages for a thread."""
     return storage.get_thread_messages(opengpts_user_id, tid)
-
 
 @router.post("/{tid}/messages")
 def add_thread_messages(

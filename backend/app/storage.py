@@ -3,6 +3,8 @@ from datetime import datetime
 from typing import List, Sequence
 
 import orjson
+from langchain_core.messages import AIMessage
+
 from agent_executor.checkpoint import RedisCheckpoint
 from langchain.schema.messages import AnyMessage
 from langchain.utilities.redis import get_client
@@ -157,6 +159,17 @@ def get_thread_messages(user_id: str, thread_id: str):
         {"messages": Topic(AnyMessage, accumulate=True)}, checkpoint
     ) as channels:
         return {k: v.get() for k, v in channels.items()}
+
+def get_thread_messages_with_number(user_id: str, thread_id: str):
+    """Get all messages for a thread."""
+    messages = get_thread_messages(user_id, thread_id)
+    if thread_id.startswith('personal'):
+        return messages
+    else:
+        brand_number = thread_id.replace('_'+user_id, '')
+        brand_number_message = AIMessage(content = 'brand_number: ' + brand_number)
+        messages['messages'].insert(0, brand_number_message)
+        return messages
 
 
 def post_thread_messages(user_id: str, thread_id: str, messages: Sequence[AnyMessage]):

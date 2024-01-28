@@ -23,7 +23,7 @@ from pydantic import BaseModel, Field
 from sse_starlette import EventSourceResponse
 
 from app.schema import OpengptsUserId
-from app.storage import get_assistant, get_thread_messages, public_user_id, post_thread_messages, list_threads
+from app.storage import get_assistant, get_thread_messages, get_thread_messages_with_number, public_user_id, post_thread_messages, list_threads
 from app.forwarder import process_message, reply_user
 from app.stream import StreamMessagesHandler
 
@@ -63,7 +63,7 @@ async def _run_input_and_config(request: Request, opengpts_user_id: OpengptsUser
             None, get_thread_messages, opengpts_user_id, body["thread_id"]
         ),
         *[asyncio.get_running_loop().run_in_executor(
-            None, get_thread_messages, opengpts_user_id, thread_id["thread_id"]
+            None, get_thread_messages_with_number, opengpts_user_id, thread_id["thread_id"]
         ) for thread_id in thread_ids if thread_id["thread_id"] != body["thread_id"]]
     )
 
@@ -71,13 +71,14 @@ async def _run_input_and_config(request: Request, opengpts_user_id: OpengptsUser
     # This condition will never happen, move this code to where tools are resolved instead
     if body["assistant_id"].startswith('personal'):
         for current_brand in brand_state:
-            for message in current_brand["messages"]:
-                if isinstance(message, AIMessage):
-                    chat_history += f'AI: {message.content}\n'
-                elif isinstance(message, HumanMessage):
-                    chat_history += f'Human: {message.content}\n'
-                else:
-                    chat_history += 'Unknown message type\n'
+            if current_brand is not None and current_brand["messages"] is not None:
+                for message in current_brand["messages"]:
+                    if isinstance(message, AIMessage):
+                        chat_history += f'AI: {message.content}\n'
+                    elif isinstance(message, HumanMessage):
+                        chat_history += f'Human: {message.content}\n'
+                    else:
+                        chat_history += 'Unknown message type\n'
 
     if not assistant:
         raise HTTPException(status_code=404, detail="Assistant not found")
@@ -149,7 +150,6 @@ async def stream_run(
                         #Add brand number for creator's reference and to use in creator-bot to reply to the brand-number
                         #Remove the * character
                         message_to_forward = message.content[1:]
-                        message_to_forward = message_to_forward + '\n' + 'Contact: +'+sender_number;
                         modified_message = AIMessage(
                             content=message_to_forward)
                         #Forward question to other party
