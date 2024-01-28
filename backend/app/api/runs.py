@@ -26,6 +26,7 @@ from app.schema import OpengptsUserId
 from app.storage import get_assistant, get_thread_messages, get_thread_messages_with_number, public_user_id, post_thread_messages, list_threads
 from app.forwarder import process_message, reply_user
 from app.stream import StreamMessagesHandler
+import re
 
 import copy
 
@@ -157,6 +158,25 @@ async def stream_run(
                         process_message(opengpts_user_id, body["assistant_id"], body["thread_id"], modified_message, creator_number)
                         #Change the reply_message if this is a forwarding message to creator
                         reply_message.content = "Great, I'll forward this to the creator and get back to you regarding next steps."
+
+                    if (message.content.startswith("brand_number:")):
+                        # Uma - Push last AIMessage to other thread(brand or creator)
+                        # Add brand number for creator's reference and to use in creator-bot to reply to the brand-number
+                        # Remove the * character
+                        match = re.search(r'brand_number: (\d+): (.+)', message.content)
+                        if match:
+                            brand_number = match.group(1)
+                            extracted_text = match.group(2)
+                            modified_message = AIMessage(
+                                content=extracted_text)
+                            # Forward question to other party
+                            process_message(opengpts_user_id, body["assistant_id"], body["thread_id"], modified_message,
+                                            brand_number)
+                            # Change the reply_message if this is a forwarding message to creator
+                            reply_message.content = "Great, I'll forward this to the brand and get back to you regarding next steps."
+                        else:
+                            print("Cannot froward from creator to brand: " + message.content)
+
 
                     #Uma - Reply to user on whatsapp, thred is update by default by opengpts
                     if not message.content.startswith("[Document"):
