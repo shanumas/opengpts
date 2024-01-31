@@ -10,7 +10,6 @@ import api.runs as runs
 
 
 async def handle(req):
-    user_id ="46708943293"
     # Parse the request body from the POST
     body = await req.json()
 
@@ -44,21 +43,19 @@ async def handle(req):
 
 
 async def send_open_gpts(req, sender, bot_num, text):
-    user_id = "46708943293"
-    base_url = os.getenv("NGROK")
 
+    user_id = os.environ.get("USERID")
     public_assistant_id = f"public_{bot_num}_{user_id}"
     public_thread_id = f"{sender}_{user_id}"
 
     public_name = "PUBLIC"
-    PUBLIC_PROMPT = os.getenv("PUBLIC_PROMPT", "You are a helpful assistant.")
+    PUBLIC_PROMPT = os.environ.get("PUBLIC_PROMPT")
 
     if sender == user_id:
         public_thread_id = f"personal_{user_id}"
         public_assistant_id = f"personal_{user_id}"
         public_name = "PERSONAL"
-        PUBLIC_PROMPT = os.getenv("PERSONAL_PROMPT", "You are a helpful assistant.")
-
+        PUBLIC_PROMPT = os.environ.get("PERSONAL_PROMPT")
 
     headers = {
         "Content-Type": "application/json",
@@ -66,53 +63,56 @@ async def send_open_gpts(req, sender, bot_num, text):
     }
 
     # Make sure the personal-assistant and personal-thread are already created
-    personal_thread_check(base_url, user_id, headers)
+    personal_thread_check(user_id, headers)
 
-    # Make sure assistant is created
-    payload = {
-        "name": public_name,
-        "config": {
-            "configurable": {
-                "thread_id": public_thread_id,
-                "type": "agent",
-                "type==agent/agent_type": "GPT 3.5 Turbo",
-                "type==agent/system_message": PUBLIC_PROMPT,
-                "type==agent/tools": [],
-                "type==dungeons_and_dragons/llm": "gpt-35-turbo",
-            }
-        },
-        "public": True,
-    }
+    #These is public assistant stuff
+    if sender != user_id:
+        # Make sure assistant is created
+        payload = {
+            "name": public_name,
+            "config": {
+                "configurable": {
+                    "thread_id": public_thread_id,
+                    "type": "agent",
+                    "type==agent/agent_type": "GPT 3.5 Turbo",
+                    "type==agent/system_message": PUBLIC_PROMPT,
+                    "type==agent/tools": [],
+                    "type==dungeons_and_dragons/llm": "gpt-35-turbo",
+                }
+            },
+            "public": True,
+        }
 
-    try:
-        storage.put_assistant(
-            user_id,
-            public_assistant_id,
-            name=payload['name'],
-            config=payload['config'],
-            public=payload['public']
-        )
-        print(f"Assistants PUT Request Successful: ")
-    except requests.exceptions.RequestException as e:
-        print(f"Error making Assistants PUT request: {e}")
+        try:
+            storage.put_assistant(
+                user_id,
+                public_assistant_id,
+                name=payload['name'],
+                config=payload['config'],
+                public=payload['public']
+            )
+            print(f"Assistants PUT Request Successful: ")
+        except requests.exceptions.RequestException as e:
+            print(f"Error making Assistants PUT request: {e}")
 
-    # Make sure thread is created
-    payload = {
-        "assistant_id": public_assistant_id,
-        "name": sender,
-    }
+        # Make sure thread is created
+        payload = {
+            "assistant_id": public_assistant_id,
+            "name": sender,
+        }
 
-    try:
-        storage.put_thread(
-            user_id,
-            public_thread_id,
-            assistant_id=payload['assistant_id'],
-            name=payload['name'],
-        )
-        print(f"Public Threads PUT Request Successful: ")
-    except requests.exceptions.RequestException as e:
-        print(f"Error making Public Threads PUT request: {e}")
+        try:
+            storage.put_thread(
+                user_id,
+                public_thread_id,
+                assistant_id=payload['assistant_id'],
+                name=payload['name'],
+            )
+            print(f"Public Threads PUT Request Successful: ")
+        except requests.exceptions.RequestException as e:
+            print(f"Error making Public Threads PUT request: {e}")
 
+    #This is general stuff
     # Post message
     payload = {
         "input": {
@@ -138,8 +138,8 @@ async def send_open_gpts(req, sender, bot_num, text):
     return {"message": "ok"}
 
 
-def personal_thread_check(base_url, user_id, headers):
-    PERSONAL_PROMPT = os.getenv("PERSONAL_PROMPT", "You are a helpful assistant.")
+def personal_thread_check(user_id, headers):
+    PERSONAL_PROMPT = os.environ.get("PERSONAL_PROMPT")
 
     personal_assistant_id = f"personal_{user_id}"
 

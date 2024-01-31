@@ -11,6 +11,7 @@ from webhook import handle
 from starlette.responses import JSONResponse
 
 from app.api import router as api_router
+import os
 
 app = FastAPI(title="OpenGPTs API")
 
