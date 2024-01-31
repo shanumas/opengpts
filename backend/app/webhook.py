@@ -4,6 +4,8 @@ from pydantic import BaseModel
 import uvicorn
 import os
 import requests
+import app.storage as storage
+import api.runs as runs
 
 
 
@@ -31,7 +33,7 @@ async def handle(req):
             # Request is received thrice, do not know why. But "messages are empty for duplicate requests"
             if body["entry"][0]["changes"][0]["value"].get("messages"):
                 text = body["entry"][0]["changes"][0]["value"]["messages"][0]["text"]["body"]
-                await send_open_gpts(body["entry"][0]["changes"][0]["value"]["messages"][0]["from"], receiver, text)
+                await send_open_gpts(req, body["entry"][0]["changes"][0]["value"]["messages"][0]["from"], receiver, text)
             else:
                 print('No messages received from Whatsapp')
             return JSONResponse(content={"message": "ok"}, status_code=200)
@@ -41,7 +43,7 @@ async def handle(req):
         return JSONResponse(content={"message": "error | unexpected body"}, status_code=400)
 
 
-async def send_open_gpts(sender, bot_num, text):
+async def send_open_gpts(req, sender, bot_num, text):
     user_id = "46708943293"
     base_url = os.getenv("NGROK")
 
@@ -57,9 +59,6 @@ async def send_open_gpts(sender, bot_num, text):
         public_name = "PERSONAL"
         PUBLIC_PROMPT = os.getenv("PERSONAL_PROMPT", "You are a helpful assistant.")
 
-    assistants_url = f"{base_url}/assistants/{public_assistant_id}"
-    threads_url = f"{base_url}/threads/{public_thread_id}"
-    stream_url = f"{base_url}/runs/stream"
 
     headers = {
         "Content-Type": "application/json",
@@ -86,9 +85,14 @@ async def send_open_gpts(sender, bot_num, text):
     }
 
     try:
-        response = requests.put(assistants_url, json=payload, headers=headers)
-        response.raise_for_status()
-        print(f"Assistants PUT Request Successful: {response.json()}")
+        storage.put_assistant(
+            user_id,
+            public_assistant_id,
+            name=payload['name'],
+            config=payload['config'],
+            public=payload['public']
+        )
+        print(f"Assistants PUT Request Successful: ")
     except requests.exceptions.RequestException as e:
         print(f"Error making Assistants PUT request: {e}")
 
@@ -99,9 +103,13 @@ async def send_open_gpts(sender, bot_num, text):
     }
 
     try:
-        response = requests.put(threads_url, json=payload, headers=headers)
-        response.raise_for_status()
-        print(f"Public Threads PUT Request Successful: {response.json()}")
+        storage.put_thread(
+            user_id,
+            public_thread_id,
+            assistant_id=payload['assistant_id'],
+            name=payload['name'],
+        )
+        print(f"Public Threads PUT Request Successful: ")
     except requests.exceptions.RequestException as e:
         print(f"Error making Public Threads PUT request: {e}")
 
@@ -122,8 +130,7 @@ async def send_open_gpts(sender, bot_num, text):
     }
 
     try:
-        response = requests.post(stream_url, json=payload, headers=headers)
-        response.raise_for_status()
+        await runs.stream_run(req, payload, user_id, public_assistant_id, public_thread_id)
         print("Stream request successful")
     except requests.exceptions.RequestException as e:
         print(f"Error making Stream request: {e}")
@@ -135,8 +142,6 @@ def personal_thread_check(base_url, user_id, headers):
     PERSONAL_PROMPT = os.getenv("PERSONAL_PROMPT", "You are a helpful assistant.")
 
     personal_assistant_id = f"personal_{user_id}"
-    personal_assistant_url = f"{base_url}/assistants/{personal_assistant_id}"
-    personal_thread_url = f"{base_url}/threads/{personal_assistant_id}"
 
     # Make sure assistant is created
     payload = {
@@ -155,36 +160,44 @@ def personal_thread_check(base_url, user_id, headers):
     }
 
     try:
-        response = requests.put(personal_assistant_url, json=payload, headers=headers)
-        response.raise_for_status()
-        print(f"Assistants PUT Request Successful: {response.json()}")
+        storage.put_assistant(
+            user_id,
+            personal_assistant_id,
+            name=payload['name'],
+            config=payload['config'],
+            public=payload['public']
+        )
+        print(f"Assistants PUT Request Successful: ")
     except requests.exceptions.RequestException as e:
         print(f"Error making Assistants PUT request: {e}")
 
     # Make sure thread is created
     payload = {"opengpts_user_id": user_id}
 
+    thisThread = None
+
     try:
-        response = requests.get(personal_thread_url, json=payload, headers=headers)
-        response.raise_for_status()
-        print(f"Get personal Thread Successful: {response.json()}")
+        thisThread = storage.get_thread(
+            user_id,
+            personal_assistant_id
+        )
     except requests.exceptions.RequestException as e:
         print(f"Get personal Thread failure: {e}")
 
+    if thisThread is None:
         # If thread does not exist, create it
-        if response.status_code == 422:
-            print("Thread does not exist, creating it")
-            threads_payload = {
-                "assistant_id": personal_assistant_id,
-                "name": "PERSONAL",
-            }
+        print("Thread does not exist, creating it")
 
-            try:
-                response = requests.put(personal_thread_url, json=threads_payload, headers=headers)
-                response.raise_for_status()
-                print(f"Personal Thread PUT Request Successful: {response.json()}")
-            except requests.exceptions.RequestException as e:
-                print(f"Error making Personal Thread PUT request: {e}")
+        try:
+            storage.put_thread(
+                user_id,
+                personal_assistant_id,
+                assistant_id=personal_assistant_id,
+                name="PERSONAL"
+            )
+            print(f"Personal Thread PUT Request Successful: ")
+        except requests.exceptions.RequestException as e:
+            print(f"Error making Personal Thread PUT request: {e}")
 
 
 

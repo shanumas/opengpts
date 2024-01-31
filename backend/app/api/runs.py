@@ -50,9 +50,13 @@ class CreateRunPayload(BaseModel):
     input: AgentInput = Field(default_factory=AgentInput)
 
 
-async def _run_input_and_config(request: Request, opengpts_user_id: OpengptsUserId):
+async def _run_input_and_config(request: Request, opengpts_user_id: OpengptsUserId, payload):
     try:
-        body = await request.json()
+        body = None
+        if payload:
+            body = payload
+        else:
+            body = await request.json()
     except json.JSONDecodeError:
         raise RequestValidationError(errors=["Invalid JSON body"])
     thread_ids = list_threads(opengpts_user_id)
@@ -122,15 +126,22 @@ async def stream_run(
     request: Request,
     payload: CreateRunPayload,  # for openapi docs
     opengpts_user_id: OpengptsUserId,
+        assistant_id: str,
+        thread_id:str
 ):
     """Create a run."""
-    input_, config, messages, chat_history = await _run_input_and_config(request, opengpts_user_id)
+    input_, config, messages, chat_history = await _run_input_and_config(request, opengpts_user_id, payload)
     #messages = messages + [HumanMessage(content="Consider also this chat history to answer my questions"+chat_history)]
     streamer = StreamMessagesHandler(messages + input_["messages"])
     event_aggregator = AsyncEventAggregatorCallback()
     config["callbacks"] = [streamer, event_aggregator]
 
-    body = await request.json()
+    body = None
+    if payload:
+        body = payload
+    else:
+        body = await request.json()
+
     sender_number = body["thread_id"].split('_')[0] if body["thread_id"].split('_')[0] != 'personal' else body["thread_id"].split('_')[1]
     creator_number = body["thread_id"].split('_')[1]
 
