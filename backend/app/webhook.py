@@ -5,27 +5,41 @@ import uvicorn
 import os
 import requests
 
-# Define your environment variables here
-# ...
 
-class WhatsAppMessage(BaseModel):
-    object: str
-    entry: list
 
-async def handle(message):
-    body = message.dict()
+async def handle(req):
+    user_id ="46708943293"
+    # Parse the request body from the POST
+    body = await req.json()
 
-    if body["object"]:
+    # Check the Incoming webhook message
+    # info on WhatsApp text message payload: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#text-messages
+    if body.get("object"):
+        print('post request reached')
         receiver = body["entry"][0]["changes"][0]["value"]["metadata"]["display_phone_number"]
+        print(receiver)
 
+        # Handle only public at the moment
+        # Check if this is a brand-bot number
         if receiver not in ["353892619075", "447587607789"]:
-            return JSONResponse(content={"message": "Not a brand-bot"}, status_code=200)
+            return JSONResponse(content={"message": "error | unexpected body"}, status_code=400)
 
-        if body["entry"][0]["changes"][0]["value"]["messages"]:
-            text = body["entry"][0]["changes"][0]["value"]["messages"][0]["text"]["body"]
-            await send_open_gpts(body["entry"][0]["changes"][0]["value"]["messages"][0]["from"], receiver, text)
+        print('publicBot reached')
 
-    return JSONResponse(content={"message": "ok"}, status_code=200)
+        if True:
+            print('Incoming message: from public-bot')
+            # Request is received thrice, do not know why. But "messages are empty for duplicate requests"
+            if body["entry"][0]["changes"][0]["value"].get("messages"):
+                text = body["entry"][0]["changes"][0]["value"]["messages"][0]["text"]["body"]
+                await send_open_gpts(body["entry"][0]["changes"][0]["value"]["messages"][0]["from"], receiver, text)
+            else:
+                print('No messages received from Whatsapp')
+            return JSONResponse(content={"message": "ok"}, status_code=200)
+        else:
+            print('Incoming message: from personal-bot')
+    else:
+        return JSONResponse(content={"message": "error | unexpected body"}, status_code=400)
+
 
 async def send_open_gpts(sender, bot_num, text):
     user_id = "46708943293"

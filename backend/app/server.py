@@ -58,8 +58,8 @@ async def verify_webhook(request):
         raise HTTPException(status_code=400, detail="Bad Request: Missing mode or token parameters")
 
 @app.route("/webhook", methods=["POST"])
-async def handle_webhook(message: WhatsAppMessage):
-    return handle(message)
+async def handle_webhook(request):
+    return await handle(request)
 
 
 #app.mount("", StaticFiles(directory=str(ROOT / "ui"), html=True), name="ui")
