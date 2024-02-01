@@ -2,6 +2,7 @@ from fastapi.responses import JSONResponse
 import storage as storage
 import runs as runs
 import os
+import requests
 
 
 async def handle(req):
@@ -128,8 +129,7 @@ async def send_open_gpts(req, sender, bot_num, text):
   }
 
   try:
-    await runs.stream_run(req, payload, user_id, public_assistant_id,
-                          public_thread_id)
+    await runs.stream_run(req, payload, user_id)
     print("Stream request successful")
   except requests.exceptions.RequestException as e:
     print(f"Error making Stream request: {e}")

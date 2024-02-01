@@ -54,7 +54,7 @@ async def _run_input_and_config(request: Request,
                                 opengpts_user_id: OpengptsUserId, payload):
   try:
     body = None
-    if payload:
+    if not hasattr(payload, "Config"):
       body = payload
     else:
       body = await request.json()
@@ -140,7 +140,7 @@ async def stream_run(
   config["callbacks"] = [streamer, event_aggregator]
 
   body = None
-  if payload:
+  if not hasattr(payload, "Config"):
     body = payload
   else:
     body = await request.json()
