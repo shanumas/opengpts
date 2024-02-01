@@ -4,8 +4,8 @@ from uuid import uuid4
 from fastapi import APIRouter, HTTPException, Path, Query
 from pydantic import BaseModel, Field
 
-import app.storage as storage
-from app.schema import Assistant, AssistantWithoutUserId, OpengptsUserId
+from ...app import storage
+from ...app.schema import Assistant, AssistantWithoutUserId, OpengptsUserId
 
 router = APIRouter()
 

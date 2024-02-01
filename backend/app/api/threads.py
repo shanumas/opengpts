@@ -6,8 +6,8 @@ from langchain.schema.messages import AnyMessage
 from langchain_core.messages import AIMessage
 from pydantic import BaseModel, Field
 
-import app.storage as storage
-from app.schema import OpengptsUserId, Thread, ThreadWithoutUserId
+from ...app import storage
+from ...app.schema import OpengptsUserId, Thread, ThreadWithoutUserId
 
 router = APIRouter()
 

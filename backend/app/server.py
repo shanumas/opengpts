@@ -6,7 +6,6 @@ import orjson
 from fastapi import FastAPI, Form, UploadFile
 from fastapi.staticfiles import StaticFiles
 from gizmo_agent import ingest_runnable
-from flask import jsonify
 from webhook import handle
 from starlette.responses import JSONResponse
 

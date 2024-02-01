@@ -12,7 +12,7 @@ from permchain.channels import Topic
 from permchain.channels.base import ChannelsManager, create_checkpoint
 from redis.client import Redis as RedisType
 
-from app.schema import Assistant, AssistantWithoutUserId, Thread, ThreadWithoutUserId
+from schema import Assistant, AssistantWithoutUserId, Thread, ThreadWithoutUserId
 
 
 def assistants_list_key(user_id: str) -> str:

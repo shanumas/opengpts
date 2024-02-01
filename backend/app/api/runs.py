@@ -22,10 +22,10 @@ from langsmith.utils import tracing_is_enabled
 from pydantic import BaseModel, Field
 from sse_starlette import EventSourceResponse
 
-from app.schema import OpengptsUserId
-from app.storage import get_assistant, get_thread_messages, get_thread_messages_with_number, public_user_id, post_thread_messages, list_threads
-from app.forwarder import process_message, reply_user
-from app.stream import StreamMessagesHandler
+from ...app.schema import OpengptsUserId
+from ...app.storage import get_assistant, get_thread_messages, get_thread_messages_with_number, public_user_id, post_thread_messages, list_threads
+from ...app.forwarder import process_message, reply_user
+from ...app.stream import StreamMessagesHandler
 import re
 
 import copy
