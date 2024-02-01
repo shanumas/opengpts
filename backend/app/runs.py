@@ -2,6 +2,7 @@ import asyncio
 import json
 from typing import AsyncIterator, Sequence
 from uuid import uuid4
+import requests
 
 import langsmith.client
 import orjson
@@ -129,9 +130,7 @@ async def create_run(
 async def stream_run(
     request: Request,
     payload: CreateRunPayload,  # for openapi docs
-    opengpts_user_id: OpengptsUserId,
-    assistant_id: str,
-    thread_id: str):
+    opengpts_user_id: OpengptsUserId):
   """Create a run."""
   input_, config, messages, chat_history = await _run_input_and_config(
       request, opengpts_user_id, payload)
