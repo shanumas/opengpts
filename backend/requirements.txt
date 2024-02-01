@@ -1,6 +1,6 @@
 langchain-cli
--e packages/gizmo-agent
--e packages/agent-executor
+backend/packages/gizmo-agent
+backend/packages/agent-executor
 langchain>=0.0.331
 langserve==0.0.32
 langsmith==0.0.70
