@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 
-gifrom ...app.api.assistants import router as assistants_router
-from ...app.api.runs import router as runs_router
-from ...app.api.threads import router as threads_router
+from assistants import router as assistants_router
+from runs import router as runs_router
+from threads import router as threads_router
 
 router = APIRouter()
 

@@ -1,7 +1,7 @@
 modules = ["python-3.11:v20-20240105-957ab14"]
 
 hidden = [".pythonlibs"]
-run = "server.py"
+run = "python3 backend/app/server.py"
 
 [nix]
 channel = "stable-23_05"
