@@ -19,7 +19,7 @@ async def handle(req):
 
     # Handle only public at the moment
     # Check if this is a brand-bot number
-    if receiver not in ["353892619075", "447587607789"]:
+    if receiver not in ["353892619074", "353892619075", "447587607789"]:
       return JSONResponse(content={"message": "error | unexpected body"},
                           status_code=400)
 
