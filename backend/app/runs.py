@@ -117,8 +117,7 @@ async def create_run(
     request: Request,
     payload: CreateRunPayload,  # for openapi docs
     opengpts_user_id: OpengptsUserId,
-    background_tasks: BackgroundTasks,
-):
+    background_tasks: BackgroundTasks):
   """Create a run."""
   input_, config, messages, chat_history = await _run_input_and_config(
       request, opengpts_user_id)
@@ -130,7 +129,9 @@ async def create_run(
 async def stream_run(
     request: Request,
     payload: CreateRunPayload,  # for openapi docs
-    opengpts_user_id: OpengptsUserId):
+    opengpts_user_id: OpengptsUserId,
+    WAPP_ID,
+    TOKEN):
   """Create a run."""
   input_, config, messages, chat_history = await _run_input_and_config(
       request, opengpts_user_id, payload)
@@ -171,7 +172,8 @@ async def stream_run(
             modified_message = AIMessage(content=message_to_forward)
             #Forward question to other party
             process_message(opengpts_user_id, body["assistant_id"],
-                            body["thread_id"], modified_message, bot_num)
+                            body["thread_id"], modified_message, bot_num,
+                            WAPP_ID, TOKEN)
             #Change the reply_message if this is a forwarding message to creator
             reply_message.content = "Great, I'll forward this to the creator and get back to you regarding next steps."
 
@@ -187,7 +189,7 @@ async def stream_run(
               # Forward question to other party
               process_message(opengpts_user_id, body["assistant_id"],
                               body["thread_id"], modified_message,
-                              brand_number)
+                              brand_number, WAPP_ID, TOKEN)
               # Change the reply_message if this is a forwarding message to creator
               reply_message.content = "Great, I'll forward this to the brand and get back to you regarding next steps."
             else:
@@ -195,7 +197,7 @@ async def stream_run(
 
           #Uma - Reply to user on whatsapp, thred is update by default by opengpts
           if not message.content.startswith("[Document"):
-            reply_user(reply_message, sender_number, bot_num)
+            reply_user(reply_message, sender_number, bot_num, WAPP_ID, TOKEN)
 
           if isinstance(message, FunctionMessage):
             streamer.output[uuid4()] = ChatGeneration(message=message)

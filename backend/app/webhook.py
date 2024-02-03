@@ -15,13 +15,17 @@ async def handle(req):
     print('post request reached')
     receiver = body["entry"][0]["changes"][0]["value"]["metadata"][
         "display_phone_number"]
-    print(receiver)
+    print("Receiver: " + receiver)
 
     # Handle only public at the moment
     # Check if this is a brand-bot number
     if receiver not in ["353892619074", "353892619075", "447587607789"]:
       return JSONResponse(content={"message": "error | unexpected body"},
                           status_code=400)
+
+    USER_ID = os.environ.get(receiver + "_USER")
+    WAPP_ID = os.environ.get(receiver + "_WAPP_ID")
+    TOKEN = os.environ.get(receiver + "_TOKEN")
 
     print('publicBot reached')
 
@@ -34,7 +38,7 @@ async def handle(req):
         await send_open_gpts(
             req,
             body["entry"][0]["changes"][0]["value"]["messages"][0]["from"],
-            receiver, text)
+            receiver, text, USER_ID, WAPP_ID, TOKEN)
       else:
         print('No messages received from Whatsapp')
       return JSONResponse(content={"message": "ok"}, status_code=200)
@@ -45,31 +49,30 @@ async def handle(req):
                         status_code=400)
 
 
-async def send_open_gpts(req, sender, bot_num, text):
+async def send_open_gpts(req, sender, bot_num, text, USER_ID, WAPP_ID, TOKEN):
 
-  user_id = os.environ.get("USERID")
-  public_assistant_id = f"public_{bot_num}_{user_id}"
-  public_thread_id = f"{sender}_{user_id}"
+  public_assistant_id = f"public_{bot_num}_{USER_ID}"
+  public_thread_id = f"{sender}_{USER_ID}"
 
   public_name = "PUBLIC"
   PUBLIC_PROMPT = os.environ.get("PUBLIC_PROMPT")
 
-  if sender == user_id:
-    public_thread_id = f"personal_{user_id}"
-    public_assistant_id = f"personal_{user_id}"
+  if sender == USER_ID:
+    public_thread_id = f"personal_{USER_ID}"
+    public_assistant_id = f"personal_{USER_ID}"
     public_name = "PERSONAL"
     PUBLIC_PROMPT = os.environ.get("PERSONAL_PROMPT")
 
   headers = {
       "Content-Type": "application/json",
-      "Cookie": f"opengpts_user_id={user_id}",
+      "Cookie": f"opengpts_USER_ID={USER_ID}",
   }
 
   # Make sure the personal-assistant and personal-thread are already created
-  personal_thread_check(user_id, headers)
+  personal_thread_check(USER_ID, headers, WAPP_ID, TOKEN)
 
   #These is public assistant stuff
-  if sender != user_id:
+  if sender != USER_ID:
     # Make sure assistant is created
     payload = {
         "name": public_name,
@@ -87,7 +90,7 @@ async def send_open_gpts(req, sender, bot_num, text):
     }
 
     try:
-      storage.put_assistant(user_id,
+      storage.put_assistant(USER_ID,
                             public_assistant_id,
                             name=payload['name'],
                             config=payload['config'],
@@ -104,7 +107,7 @@ async def send_open_gpts(req, sender, bot_num, text):
 
     try:
       storage.put_thread(
-          user_id,
+          USER_ID,
           public_thread_id,
           assistant_id=payload['assistant_id'],
           name=payload['name'],
@@ -129,7 +132,7 @@ async def send_open_gpts(req, sender, bot_num, text):
   }
 
   try:
-    await runs.stream_run(req, payload, user_id)
+    await runs.stream_run(req, payload, USER_ID, WAPP_ID, TOKEN)
     print("Stream request successful")
   except requests.exceptions.RequestException as e:
     print(f"Error making Stream request: {e}")
@@ -137,10 +140,10 @@ async def send_open_gpts(req, sender, bot_num, text):
   return {"message": "ok"}
 
 
-def personal_thread_check(user_id, headers):
+def personal_thread_check(USER_ID, headers, WAPP_ID, TOKEN):
   PERSONAL_PROMPT = os.environ.get("PERSONAL_PROMPT")
 
-  personal_assistant_id = f"personal_{user_id}"
+  personal_assistant_id = f"personal_{USER_ID}"
 
   # Make sure assistant is created
   payload = {
@@ -159,7 +162,7 @@ def personal_thread_check(user_id, headers):
   }
 
   try:
-    storage.put_assistant(user_id,
+    storage.put_assistant(USER_ID,
                           personal_assistant_id,
                           name=payload['name'],
                           config=payload['config'],
@@ -169,12 +172,12 @@ def personal_thread_check(user_id, headers):
     print(f"Error making Assistants PUT request: {e}")
 
   # Make sure thread is created
-  payload = {"opengpts_user_id": user_id}
+  payload = {"opengpts_USER_ID": USER_ID}
 
   thisThread = None
 
   try:
-    thisThread = storage.get_thread(user_id, personal_assistant_id)
+    thisThread = storage.get_thread(USER_ID, personal_assistant_id)
   except requests.exceptions.RequestException as e:
     print(f"Get personal Thread failure: {e}")
 
@@ -183,7 +186,7 @@ def personal_thread_check(user_id, headers):
     print("Thread does not exist, creating it")
 
     try:
-      storage.put_thread(user_id,
+      storage.put_thread(USER_ID,
                          personal_assistant_id,
                          assistant_id=personal_assistant_id,
                          name="PERSONAL")
