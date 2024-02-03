@@ -2,10 +2,13 @@ import requests
 import os
 
 
-def send_message(message, to_number, bot_number):
-  WAPP_ID_NAME = "WAPP_ID_" + bot_number
-  TOKEN = os.environ.get(bot_number, "")
-  WAPP_ID = os.environ.get(WAPP_ID_NAME, "")
+def send_message(message, to_number):
+  USERID = os.environ.get('USERID', "")
+  BOTNUMBER = os.environ.get(USERID + "_BOT", "")
+  TOKEN = os.environ.get(BOTNUMBER, "")
+  WAPP_ID = os.environ.get("WAPP_ID_" + BOTNUMBER, "")
+
+  print("TOKEN: " + TOKEN + "-, WAPP_ID: " + WAPP_ID + "-")
 
   headers = {
       'Authorization': 'Bearer ' + TOKEN,
@@ -21,6 +24,7 @@ def send_message(message, to_number, bot_number):
       }
   }
   url = "https://graph.facebook.com/v18.0/" + WAPP_ID + "/messages"
+  print("URL: " + url + "-")
   data["text"]["body"] = message
   response = requests.post(url, headers=headers, json=data)
   print(response.text)

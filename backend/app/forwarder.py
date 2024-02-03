@@ -14,18 +14,18 @@ def __init__(self, user_id: str):
 def reply_user(message: AIMessage, to_number, bot_number):
   #Some retrieval tools could send some objects, filter them
   if isinstance(message.content, str):
-    send_message(message.content, to_number, bot_number)
+    send_message(message.content, to_number)
 
 
 def process_message(user_id: str, assistant_id: str, thread_id: str,
-                    message: AIMessage, creator_number: str, bot_number: str):
+                    message: AIMessage, creator_number: str):
   matching_assistants = find_assistants_by_suffix(user_id, assistant_id)
   for assistant in matching_assistants:
     threads = list_threads(user_id)
     for thread in threads:
       if thread["assistant_id"] != assistant_id:
         post_thread_messages(user_id, thread["thread_id"], [message])
-        send_message(message.content, creator_number, bot_number)
+        send_message(message.content, creator_number)
 
 
 def find_assistants_by_suffix(user_id, assistant_id: str) -> List[str]:
