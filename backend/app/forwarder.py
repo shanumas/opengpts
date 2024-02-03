@@ -8,43 +8,46 @@ from storage import list_assistants, get_assistant, post_thread_messages, list_t
 
 
 def __init__(self, user_id: str):
-    self.user_id = user_id
-
-def reply_user(message: AIMessage, to_number, from_id):
-    #Some retrieval tools could send some objects, filter them
-    if isinstance(message.content, str):
-        send_message(message.content, to_number, from_id)
+  self.user_id = user_id
 
 
+def reply_user(message: AIMessage, to_number):
+  #Some retrieval tools could send some objects, filter them
+  if isinstance(message.content, str):
+    send_message(message.content, to_number)
 
-def process_message(user_id: str, assistant_id: str,thread_id: str, message: AIMessage, creator_number: str):
-    matching_assistants = find_assistants_by_suffix(user_id, assistant_id)
-    for assistant in matching_assistants:
-        threads = list_threads(user_id)
-        for thread in threads:
-            if thread["assistant_id"] != assistant_id:
-                post_thread_messages(user_id, thread["thread_id"], [message])
-                #This is ford id or +1 number
-                send_message(message.content,creator_number, "140653755809086")
+
+def process_message(user_id: str, assistant_id: str, thread_id: str,
+                    message: AIMessage, creator_number: str):
+  matching_assistants = find_assistants_by_suffix(user_id, assistant_id)
+  for assistant in matching_assistants:
+    threads = list_threads(user_id)
+    for thread in threads:
+      if thread["assistant_id"] != assistant_id:
+        post_thread_messages(user_id, thread["thread_id"], [message])
+        #This is ford id or +1 number
+        send_message(message.content, creator_number)
 
 
 def find_assistants_by_suffix(user_id, assistant_id: str) -> List[str]:
-    assistant = get_assistant(user_id, assistant_id)
-    if assistant:
-        suffix = assistant_id.rsplit('_', 1)[-1]  # Get the suffix after the last underscore
-        assistants = list_assistants(user_id)
-        matching_assistants = [
-            a for a in assistants if (a["assistant_id"] != assistant_id) & (a["assistant_id"].endswith(suffix))
-        ]
-        return matching_assistants
-    else:
-        return []
+  assistant = get_assistant(user_id, assistant_id)
+  if assistant:
+    suffix = assistant_id.rsplit(
+        '_', 1)[-1]  # Get the suffix after the last underscore
+    assistants = list_assistants(user_id)
+    matching_assistants = [
+        a for a in assistants if (a["assistant_id"] != assistant_id)
+        & (a["assistant_id"].endswith(suffix))
+    ]
+    return matching_assistants
+  else:
+    return []
+
 
 def get_assistant_by_id(user_id, assistant_id: str) -> Optional[dict]:
-    # Implement logic to retrieve the assistant by ID
-    assistants = list_assistants(user_id)
-    for assistant in assistants:
-        if assistant["assistant_id"] == assistant_id:
-            return assistant
-    return None
-
+  # Implement logic to retrieve the assistant by ID
+  assistants = list_assistants(user_id)
+  for assistant in assistants:
+    if assistant["assistant_id"] == assistant_id:
+      return assistant
+  return None

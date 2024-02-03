@@ -1,27 +1,28 @@
 import requests
+import os
 
 
+def send_message(message, to_number):
+  USER_ID = os.environ.get("USER_ID", "")
+  TOKEN_NAME = USER_ID
+  WAPP_ID_NAME = "WAPP_ID_" + USER_ID
+  TOKEN = os.environ.get(TOKEN_NAME, "")
+  WAPP_ID = os.environ.get(WAPP_ID_NAME, "")
 
-headers = {
-    'Authorization': 'Bearer EAAEgVu0jNtABOwJN0F85eIhGf4vtBzG4VlnWrqANHVj3MAwz17YGOrPwp60LvRQNHNQ4QYaDtO6qskZCMq3uPnakaxP8LYZAVsjN2QTQVlAPlA5ZCx3AwMuOHsbrTBUf0OZCT1UOzJ9r3ZA9ERycSq13zyhM0dSv7EUyXJyfETNOatkVKUw5Np9OH87ZBX2JxS',
-    'Content-Type': 'application/json'
-}
-
-
-
-def send_message(message, to_number, from_id):
-    #RN we can send messages only from 353 892619075
-    from_id = "189399934262514"
-    data = {
-        "messaging_product": "whatsapp",
-        "to": to_number,
-        "type": "text",
-        "text": {
-            "preview_url": "true",
-            "body": "Question from Artisanals: "
-        }
-    }
-    url = "https://graph.facebook.com/v18.0/"+from_id+"/messages"
-    data["text"]["body"] = message
-    response = requests.post(url, headers=headers, json=data)
-    print(response.text)
+  headers = {
+      'Authorization': 'Bearer ' + TOKEN,
+      'Content-Type': 'application/json'
+  }
+  data = {
+      "messaging_product": "whatsapp",
+      "to": to_number,
+      "type": "text",
+      "text": {
+          "preview_url": "true",
+          "body": "Question from Artisanals: "
+      }
+  }
+  url = "https://graph.facebook.com/v18.0/" + WAPP_ID + "/messages"
+  data["text"]["body"] = message
+  response = requests.post(url, headers=headers, json=data)
+  print(response.text)
