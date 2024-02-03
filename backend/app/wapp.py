@@ -3,7 +3,7 @@ import os
 
 
 def send_message(message, to_number):
-  USER_ID = os.environ.get("USER_ID", "")
+  USER_ID = os.environ.get("USERID", "")
   TOKEN_NAME = USER_ID
   WAPP_ID_NAME = "WAPP_ID_" + USER_ID
   TOKEN = os.environ.get(TOKEN_NAME, "")
