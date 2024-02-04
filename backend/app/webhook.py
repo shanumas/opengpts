@@ -65,7 +65,7 @@ async def send_open_gpts(req, sender, bot_num, text, USER_ID, WAPP_ID, TOKEN):
 
   headers = {
       "Content-Type": "application/json",
-      "Cookie": f"opengpts_USER_ID={USER_ID}",
+      "Cookie": f"opengpts_user_id={USER_ID}",
   }
 
   # Make sure the personal-assistant and personal-thread are already created
@@ -172,7 +172,7 @@ def personal_thread_check(USER_ID, headers, WAPP_ID, TOKEN):
     print(f"Error making Assistants PUT request: {e}")
 
   # Make sure thread is created
-  payload = {"opengpts_USER_ID": USER_ID}
+  payload = {"opengpts_user_id": USER_ID}
 
   thisThread = None
 
