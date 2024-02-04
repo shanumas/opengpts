@@ -120,7 +120,7 @@ async def create_run(
     background_tasks: BackgroundTasks):
   """Create a run."""
   input_, config, messages, chat_history = await _run_input_and_config(
-      request, opengpts_user_id)
+      request, opengpts_user_id, payload)
   background_tasks.add_task(agent.ainvoke, input_, config)
   return {"status": "ok"}  # TODO add a run id
 

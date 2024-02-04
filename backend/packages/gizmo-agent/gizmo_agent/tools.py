@@ -46,6 +46,7 @@ def get_retrieval_tool(assistant_id: str):
 
 
 def get_chat_history_tool(chat_history: str):
+  print("Getting Chat History Tool: Start")
   CHAT_HISTORY_DESCRIPTION = """Can be used to look up information that was uploaded to this assistant.
     If the user is referencing particular brand conversation, that is often a good hint that information may be here."""
   documents = Document(page_content=chat_history, metadata={"source": "local"})
@@ -54,6 +55,7 @@ def get_chat_history_tool(chat_history: str):
   embeddings = OpenAIEmbeddings()
   db = FAISS.from_documents(docs, embeddings)
   retriever = db.as_retriever()
+  print("Getting Chat History Tool: End")
   return create_retriever_tool(
       retriever,
       "ChatHistoryTool",
