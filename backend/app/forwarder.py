@@ -11,7 +11,7 @@ def __init__(self, user_id: str):
   self.user_id = user_id
 
 
-def reply_user(message: AIMessage, to_number, bot_number, WAPP_ID, TOKEN):
+def reply_user(message: AIMessage, to_number, WAPP_ID, TOKEN):
   #Some retrieval tools could send some objects, filter them
   if isinstance(message.content, str):
     send_message(message.content, to_number, WAPP_ID, TOKEN)

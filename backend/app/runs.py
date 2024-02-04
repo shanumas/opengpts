@@ -197,8 +197,7 @@ async def stream_run(
 
           #Uma - Reply to user on whatsapp, thred is update by default by opengpts
           if not message.content.startswith("[Document"):
-            reply_user(reply_message, sender_number, sender_number, WAPP_ID,
-                       TOKEN)
+            reply_user(reply_message, sender_number, WAPP_ID, TOKEN)
 
           if isinstance(message, FunctionMessage):
             streamer.output[uuid4()] = ChatGeneration(message=message)
