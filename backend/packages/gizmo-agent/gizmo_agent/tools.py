@@ -50,7 +50,7 @@ def get_chat_history_tool(chat_history: str):
   CHAT_HISTORY_DESCRIPTION = """Can be used to look up information that was uploaded to this assistant.
     If the user is referencing particular brand conversation, that is often a good hint that information may be here."""
   documents = Document(page_content=chat_history, metadata={"source": "local"})
-  text_splitter = CharacterTextSplitter(chunk_size=4000, chunk_overlap=50)
+  text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
   docs = text_splitter.split_documents([documents])
   embeddings = OpenAIEmbeddings()
   db = FAISS.from_documents(docs, embeddings)
