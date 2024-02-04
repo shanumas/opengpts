@@ -149,7 +149,6 @@ async def stream_run(
 
   sender_number = body["thread_id"].split('_')[0] if body["thread_id"].split(
       '_')[0] != 'personal' else body["thread_id"].split('_')[1]
-  bot_num = body["thread_id"].split('_')[1]
 
   # Call the runnable in streaming mode,
   # add each chunk to the output stream
@@ -172,7 +171,7 @@ async def stream_run(
             modified_message = AIMessage(content=message_to_forward)
             #Forward question to other party
             process_message(opengpts_user_id, body["assistant_id"],
-                            body["thread_id"], modified_message, bot_num,
+                            body["thread_id"], modified_message, sender_number,
                             WAPP_ID, TOKEN)
             #Change the reply_message if this is a forwarding message to creator
             reply_message.content = "Great, I'll forward this to the creator and get back to you regarding next steps."
