@@ -12,22 +12,22 @@ from langchain.vectorstores.redis import RedisFilter
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain.schema.document import Document
-from langchain.text_splitter import CharacterTextSplitter
+from langchain.text_splitter import TokenTextSplitter
 from langchain_community.document_loaders import TextLoader
 
 from gizmo_agent.ingest import vstore
 
 
 class DDGInput(BaseModel):
-    query: str = Field(description="search query to look up")
+  query: str = Field(description="search query to look up")
 
 
 class ArxivInput(BaseModel):
-    query: str = Field(description="search query to look up")
+  query: str = Field(description="search query to look up")
 
 
 class PythonREPLInput(BaseModel):
-    query: str = Field(description="python command to run")
+  query: str = Field(description="python command to run")
 
 
 RETRIEVER_DESCRIPTION = """Can be used to look up information that was uploaded to this assistant.
@@ -35,103 +35,101 @@ If the user is referencing particular files, that is often a good hint that info
 
 
 def get_retrieval_tool(assistant_id: str):
-    return create_retriever_tool(
-        vstore.as_retriever(
-            search_kwargs={"filter": RedisFilter.tag("namespace") == assistant_id}
-        ),
-        "Retriever",
-        RETRIEVER_DESCRIPTION,
-    )
+  return create_retriever_tool(
+      vstore.as_retriever(
+          search_kwargs={
+              "filter": RedisFilter.tag("namespace") == assistant_id
+          }),
+      "Retriever",
+      RETRIEVER_DESCRIPTION,
+  )
 
-def get_chat_history_tool(chat_history:str):
-    CHAT_HISTORY_DESCRIPTION = """Can be used to look up information that was uploaded to this assistant.
+
+def get_chat_history_tool(chat_history: str):
+  CHAT_HISTORY_DESCRIPTION = """Can be used to look up information that was uploaded to this assistant.
     If the user is referencing particular brand conversation, that is often a good hint that information may be here."""
-    documents = Document(
-        page_content=chat_history,
-        metadata={"source": "local"}
-    )
-    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
-    docs = text_splitter.split_documents([documents])
-    embeddings = OpenAIEmbeddings()
-    db = FAISS.from_documents(docs, embeddings)
-    retriever = db.as_retriever()
-    return create_retriever_tool(
-        retriever,
-        "ChatHistoryTool",
-        CHAT_HISTORY_DESCRIPTION,
-    )
+  documents = Document(page_content=chat_history, metadata={"source": "local"})
+  text_splitter = RecursiveCharacterTextSplitter(chunk_size=4000,
+                                                 chunk_overlap=50)
+  docs = text_splitter.split_documents([documents])
+  embeddings = OpenAIEmbeddings()
+  db = FAISS.from_documents(docs, embeddings)
+  retriever = db.as_retriever()
+  return create_retriever_tool(
+      retriever,
+      "ChatHistoryTool",
+      CHAT_HISTORY_DESCRIPTION,
+  )
 
 
 def _get_duck_duck_go():
-    return DuckDuckGoSearchRun(args_schema=DDGInput)
+  return DuckDuckGoSearchRun(args_schema=DDGInput)
 
 
 def _get_arxiv():
-    return ArxivQueryRun(api_wrapper=ArxivAPIWrapper(), args_schema=ArxivInput)
+  return ArxivQueryRun(api_wrapper=ArxivAPIWrapper(), args_schema=ArxivInput)
 
 
 def _get_you_search():
-    return create_retriever_tool(
-        YouRetriever(n_hits=3, n_snippets_per_hit=3),
-        "you_search",
-        "Searches for documents using You.com",
-    )
+  return create_retriever_tool(
+      YouRetriever(n_hits=3, n_snippets_per_hit=3),
+      "you_search",
+      "Searches for documents using You.com",
+  )
 
 
 def _get_sec_filings():
-    return create_retriever_tool(
-        KayAiRetriever.create(
-            dataset_id="company", data_types=["10-K", "10-Q"], num_contexts=3
-        ),
-        "sec_filings_search",
-        "Search for a query among SEC Filings",
-    )
+  return create_retriever_tool(
+      KayAiRetriever.create(dataset_id="company",
+                            data_types=["10-K", "10-Q"],
+                            num_contexts=3),
+      "sec_filings_search",
+      "Search for a query among SEC Filings",
+  )
 
 
 def _get_press_releases():
-    return create_retriever_tool(
-        KayAiRetriever.create(
-            dataset_id="company", data_types=["PressRelease"], num_contexts=6
-        ),
-        "press_release_search",
-        "Search for a query among press releases from US companies",
-    )
+  return create_retriever_tool(
+      KayAiRetriever.create(dataset_id="company",
+                            data_types=["PressRelease"],
+                            num_contexts=6),
+      "press_release_search",
+      "Search for a query among press releases from US companies",
+  )
 
 
 def _get_pubmed():
-    return create_retriever_tool(
-        PubMedRetriever(), "pub_med_search", "Search for a query on PubMed"
-    )
+  return create_retriever_tool(PubMedRetriever(), "pub_med_search",
+                               "Search for a query on PubMed")
 
 
 def _get_wikipedia():
-    return create_retriever_tool(
-        WikipediaRetriever(), "wikipedia", "Search for a query on Wikipedia"
-    )
+  return create_retriever_tool(WikipediaRetriever(), "wikipedia",
+                               "Search for a query on Wikipedia")
 
 
 def _get_tavily():
-    tavily_search = TavilySearchAPIWrapper()
-    return TavilySearchResults(api_wrapper=tavily_search)
+  tavily_search = TavilySearchAPIWrapper()
+  return TavilySearchResults(api_wrapper=tavily_search)
 
 
 def _get_tavily_answer():
-    tavily_search = TavilySearchAPIWrapper()
-    return TavilyAnswer(api_wrapper=tavily_search)
+  tavily_search = TavilySearchAPIWrapper()
+  return TavilyAnswer(api_wrapper=tavily_search)
 
 
 class AvailableTools(str, Enum):
-    DDG_SEARCH = "DDG Search"
-    TAVILY = "Search (Tavily)"
-    TAVILY_ANSWER = "Search (short answer, Tavily)"
-    RETRIEVAL = "Retrieval"
-    ARXIV = "Arxiv"
-    YOU_SEARCH = "You.com Search"
-    SEC_FILINGS = "SEC Filings (Kay.ai)"
-    PRESS_RELEASES = "Press Releases (Kay.ai)"
-    PUBMED = "PubMed"
-    WIKIPEDIA = "Wikipedia"
-    CHAT_HISTORY = "ChatHistoryTool"
+  DDG_SEARCH = "DDG Search"
+  TAVILY = "Search (Tavily)"
+  TAVILY_ANSWER = "Search (short answer, Tavily)"
+  RETRIEVAL = "Retrieval"
+  ARXIV = "Arxiv"
+  YOU_SEARCH = "You.com Search"
+  SEC_FILINGS = "SEC Filings (Kay.ai)"
+  PRESS_RELEASES = "Press Releases (Kay.ai)"
+  PUBMED = "PubMed"
+  WIKIPEDIA = "Wikipedia"
+  CHAT_HISTORY = "ChatHistoryTool"
 
 
 TOOLS = {
@@ -150,4 +148,4 @@ TOOL_OPTIONS = {e.value: e.value for e in AvailableTools}
 
 # Check if dependencies and env vars for each tool are available
 for k, v in TOOLS.items():
-    v()
+  v()
