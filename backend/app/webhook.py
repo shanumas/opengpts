@@ -165,6 +165,7 @@ def personal_thread_check(USER_ID, headers, WAPP_ID, TOKEN):
     storage.put_assistant(USER_ID,
                           personal_assistant_id,
                           name=payload['name'],
+                          config=payload['config'],
                           public=payload['public'])
     print(f"Assistants PUT Request Successful: ")
   except requests.exceptions.RequestException as e:
