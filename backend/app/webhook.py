@@ -27,7 +27,10 @@ async def handle(req):
     WAPP_ID = os.environ.get(receiver + "_WAPP_ID")
     TOKEN = os.environ.get(receiver + "_TOKEN")
 
-    print('publicBot reached')
+    print('publicBot reached: : ' + receiver)
+    print('publicBot reached: USER_ID: ' + USER_ID)
+    print('publicBot reached: WAPP_ID: ' + WAPP_ID)
+    print('publicBot reached: TOKEN: ' + TOKEN)
 
     if True:
       print('Incoming message: from public-bot')
@@ -133,7 +136,9 @@ async def send_open_gpts(req, sender, bot_num, text, USER_ID, WAPP_ID, TOKEN):
 
   try:
     await runs.stream_run(req, payload, USER_ID, WAPP_ID, TOKEN)
-    print("Stream request successful")
+    print("Stream request successful: " + "USERID: " + USER_ID + "PAYLOAD: ")
+    print(payload)
+    print("TOKEN: " + TOKEN + "-, WAPP_ID: " + WAPP_ID + "-")
   except requests.exceptions.RequestException as e:
     print(f"Error making Stream request: {e}")
 

@@ -1,26 +1,3 @@
 {
-  "files": {
-    "backend/app/runs.py": [
-      {
-        "id": "965d0b34-5db8-4a5d-8d97-99ca0acad68e",
-        "line": 5,
-        "version": 69,
-        "index": 93
-      }
-    ],
-    "backend/app/webhook.py": [
-      {
-        "id": "d8f97f0f-ab25-4eff-af5a-6a1b539f0d35",
-        "line": 30,
-        "version": 345,
-        "index": 1003
-      },
-      {
-        "id": "87717a20-743b-4cc8-8a86-11f46e6fa2db",
-        "line": 75,
-        "version": 345,
-        "index": 2591
-      }
-    ]
-  }
+  "files": {}
 }

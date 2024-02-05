@@ -7,3 +7,5 @@ langsmith==0.0.70
 permchain
 python-multipart
 python-magic
+tiktoken
+faiss-cpu

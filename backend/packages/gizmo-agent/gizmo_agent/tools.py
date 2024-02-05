@@ -47,13 +47,15 @@ def get_retrieval_tool(assistant_id: str):
 
 def get_chat_history_tool(chat_history: str):
   print("Getting Chat History Tool: Start")
-  CHAT_HISTORY_DESCRIPTION = """Can be used to look up information that was uploaded to this assistant.
-    If the user is referencing particular brand conversation, that is often a good hint that information may be here."""
+  CHAT_HISTORY_DESCRIPTION = "desc"
   documents = Document(page_content=chat_history, metadata={"source": "local"})
   text_splitter = CharacterTextSplitter(chunk_size=4000, chunk_overlap=0)
   docs = text_splitter.split_documents([documents])
   embeddings = OpenAIEmbeddings()
-  db = FAISS.from_documents(docs, embeddings)
+  try:
+    db = FAISS.from_documents(docs, embeddings)
+  except Exception as e:
+    print(f"An error occurred: {e}")
   retriever = db.as_retriever()
   print("Getting Chat History Tool: End")
   return create_retriever_tool(

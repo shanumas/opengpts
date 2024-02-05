@@ -196,6 +196,7 @@ async def stream_run(
               print("Cannot froward from creator to brand: " + message.content)
 
           #Uma - Reply to user on whatsapp, thred is update by default by opengpts
+          print("Content: " + message.content)
           if not message.content.startswith("[Document"):
             reply_user(reply_message, sender_number, WAPP_ID, TOKEN)
 
