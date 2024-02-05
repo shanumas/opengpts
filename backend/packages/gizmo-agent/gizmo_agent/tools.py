@@ -49,7 +49,7 @@ def get_chat_history_tool(chat_history: str):
   print("Getting Chat History Tool: Start")
   CHAT_HISTORY_DESCRIPTION = "desc"
   documents = Document(page_content=chat_history, metadata={"source": "local"})
-  text_splitter = CharacterTextSplitter(chunk_size=4000, chunk_overlap=0)
+  text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
   docs = text_splitter.split_documents([documents])
   embeddings = OpenAIEmbeddings()
   try:
